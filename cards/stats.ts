@@ -1,5 +1,5 @@
-import type { Theme } from "../lib/query.js";
-import { cardFrame, cardFooter, textLine, muted, chip } from "./svg.js";
+import type { Theme } from "../lib/query";
+import { cardFrame, cardFooter, textLine, muted, chip } from "./svg";
 
 export function renderStats(theme: Theme, stats: { name: string; username: string; repos: number; followers: number; stars: number; forks: number; }) {
   const W=480, H=190;

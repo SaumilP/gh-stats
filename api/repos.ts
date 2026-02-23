@@ -1,7 +1,7 @@
-import { qFormat, qInt, qString, qTheme } from "../lib/query.js";
-import { setJsonHeaders, setSvgHeaders } from "../lib/http.js";
-import { listRepos } from "../lib/github.js";
-import { renderRepos } from "../cards/repos.js";
+import { qFormat, qInt, qString, qTheme } from "../lib/query";
+import { setJsonHeaders, setSvgHeaders } from "../lib/http";
+import { listRepos } from "../lib/github";
+import { renderRepos } from "../cards/repos";
 
 function sortRepos(repos: any[], sort: string) {
   const s = (sort || "stars").toLowerCase();

@@ -1,4 +1,4 @@
-import type { Theme } from "./query.js";
+import type { Theme } from "./query";
 
 export function setSvgHeaders(res: any) {
   res.setHeader("Content-Type", "image/svg+xml; charset=utf-8");

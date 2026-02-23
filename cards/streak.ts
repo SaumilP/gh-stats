@@ -1,5 +1,5 @@
-import type { Theme } from "../lib/query.js";
-import { cardFrame, cardFooter, textLine, muted, chip } from "./svg.js";
+import type { Theme } from "../lib/query";
+import { cardFrame, cardFooter, textLine, muted, chip } from "./svg";
 
 export function renderStreak(theme: Theme, username: string, s: { current: number; longest: number; total: number }) {
   const W=480,H=180;

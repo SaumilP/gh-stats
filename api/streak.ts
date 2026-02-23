@@ -1,8 +1,8 @@
-import { qFormat, qString, qTheme } from "../lib/query.js";
-import { setJsonHeaders, setSvgHeaders } from "../lib/http.js";
-import { graphQL } from "../lib/github.js";
-import { computeStreak } from "../lib/streak.js";
-import { renderStreak } from "../cards/streak.js";
+import { qFormat, qString, qTheme } from "../lib/query";
+import { setJsonHeaders, setSvgHeaders } from "../lib/http";
+import { graphQL } from "../lib/github";
+import { computeStreak } from "../lib/streak";
+import { renderStreak } from "../cards/streak";
 
 type GqlResp = {
   user: { contributionsCollection: { contributionCalendar: { weeks: Array<{ contributionDays: Array<{ date: string; contributionCount: number }> }> } } };

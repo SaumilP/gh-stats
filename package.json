@@ -2,7 +2,6 @@
   "name": "github-stats-vercel",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "dev": "vercel dev",
     "lint": "node -e \"console.log('No lint configured')\"",
