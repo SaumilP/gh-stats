@@ -1,8 +1,13 @@
 import type { Theme } from "../lib/query";
 import { cardFrame, cardFooter, textLine, muted } from "./svg";
 
-export function renderRepos(theme: Theme, username: string, repos: Array<{ name: string; stars: number; forks: number; desc?: string }>) {
-  const W=720;
+export function renderRepos(
+  theme: Theme,
+  username: string,
+  repos: Array<{ name: string; stars: number; forks: number; desc?: string }>,
+  opts: { compact?: boolean } = {},
+) {
+  const W=opts.compact ? 560 : 720;
   const rows=Math.min(6, repos.length);
   const H=92 + rows*44;
   let svg=cardFrame(theme,W,H,`Top Repositories: ${username}`);
@@ -15,7 +20,8 @@ export function renderRepos(theme: Theme, username: string, repos: Array<{ name:
     svg += textLine(theme,18,y,`${r.name}  ⭐${r.stars}  🍴${r.forks}`,13,700);
     const d=(r.desc||"").trim();
     if (d){
-      const clipped=d.length>80? d.slice(0,77)+"…": d;
+      const limit = opts.compact ? 56 : 80;
+      const clipped=d.length>limit? d.slice(0,limit-3)+"…": d;
       svg += muted(theme,18,y+18,clipped,12);
     }
     svg += `<line x1="18" y1="${y+28}" x2="${W-18}" y2="${y+28}" stroke="rgba(125,125,125,0.25)" />`;

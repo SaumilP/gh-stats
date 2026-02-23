@@ -1,0 +1,34 @@
+name: Pregenerate Cards
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  pregenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Generate SVG cards
+        env:
+          GH_STATS_BASE_URL: ${{ vars.GH_STATS_BASE_URL }}
+          GH_STATS_USERNAME: ${{ vars.GH_STATS_USERNAME }}
+        run: node scripts/pregenerate.mjs
+      - name: Commit changes (if any)
+        run: |
+          if git diff --quiet; then
+            echo "No changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/cards
+          git commit -m "chore: pregenerate cards"
+          git push

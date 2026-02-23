@@ -1,8 +1,12 @@
 import type { Theme } from "../lib/query";
 import { cardFrame, cardFooter, textLine, muted, chip } from "./svg";
 
-export function renderStats(theme: Theme, stats: { name: string; username: string; repos: number; followers: number; stars: number; forks: number; }) {
-  const W=480, H=190;
+export function renderStats(
+  theme: Theme,
+  stats: { name: string; username: string; repos: number; followers: number; stars: number; forks: number },
+  opts: { compact?: boolean } = {},
+) {
+  const W=480, H=opts.compact ? 170 : 190;
   let svg = cardFrame(theme, W, H, `GitHub Stats: ${stats.username}`);
   svg += textLine(theme, 18, 36, stats.name, 18, 800);
   svg += muted(theme, 18, 56, `@${stats.username}`);
@@ -13,7 +17,7 @@ export function renderStats(theme: Theme, stats: { name: string; username: strin
   const c3=chip(theme,x,84,`🍴 Forks: ${stats.forks}`); svg+=c3.svg;
 
   svg += chip(theme,18,116,`👥 Followers: ${stats.followers}`).svg;
-  svg += muted(theme, 18, 170, "Cache: up to 6h (edge) • Powered by GitHub API");
+  svg += muted(theme, 18, H-20, "Cache: up to 6h (edge) • Powered by GitHub API");
   svg += cardFooter();
   return svg;
 }

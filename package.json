@@ -5,11 +5,14 @@
   "scripts": {
     "dev": "node -e \"console.log('Run: npm run vercel:dev')\"",
     "vercel:dev": "vercel dev",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "node -e \"console.log('No lint configured')\"",
-    "test": "node -e \"console.log('No tests configured')\""
+    "test": "node -e \"console.log('No tests configured')\"",
+    "audit": "npm audit --audit-level=high",
+    "pregenerate": "node scripts/pregenerate.mjs"
   },
   "devDependencies": {
-    "@types/node": "^24.0.0",
+    "@types/node": "25.3.0",
     "typescript": "5.9.3"
   },
   "engines": {

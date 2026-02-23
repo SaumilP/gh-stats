@@ -11,6 +11,13 @@ export function qInt(q: any, key: string, def: number, min: number, max: number)
   return Math.max(min, Math.min(max, n));
 }
 
+export function qBool(q: any, key: string, def = false): boolean {
+  const raw = qString(q, key);
+  if (raw === undefined) return def;
+  const s = String(raw).toLowerCase();
+  return s === "1" || s === "true" || s === "yes" || s === "on";
+}
+
 export type Theme = "dark" | "light";
 
 export function qTheme(q: any): Theme {
@@ -21,4 +28,14 @@ export function qTheme(q: any): Theme {
 export function qFormat(q: any): "svg" | "json" {
   const f = (qString(q, "format", "svg") || "svg").toLowerCase();
   return (f === "json" ? "json" : "svg");
+}
+
+export function qCacheSeconds(q: any, def: number): number {
+  // Cost-control knob; clamp 5m..24h.
+  const v = qInt(q, "cacheSeconds", def, 300, 86400);
+  return v;
+}
+
+export function qCompact(q: any): boolean {
+  return qBool(q, "compact", false);
 }
