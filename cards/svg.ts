@@ -1,5 +1,5 @@
-import { themeTokens } from "../lib/http";
-import type { Theme } from "../lib/query";
+import { themeTokens } from "../lib/http.js";
+import type { Theme } from "../lib/query.js";
 
 export function escapeXml(s: string) {
   return s.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll("\"","&quot;").replaceAll("'","&apos;");

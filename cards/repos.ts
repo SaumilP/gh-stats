@@ -1,5 +1,5 @@
-import type { Theme } from "../lib/query";
-import { cardFrame, cardFooter, textLine, muted } from "./svg";
+import type { Theme } from "../lib/query.js";
+import { cardFrame, cardFooter, textLine, muted } from "./svg.js";
 
 export function renderRepos(theme: Theme, username: string, repos: Array<{ name: string; stars: number; forks: number; desc?: string }>) {
   const W=720;

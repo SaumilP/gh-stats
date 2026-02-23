@@ -1,5 +1,5 @@
-import type { Theme } from "../lib/query";
-import { cardFrame, cardFooter, textLine, muted, bar } from "./svg";
+import type { Theme } from "../lib/query.js";
+import { cardFrame, cardFooter, textLine, muted, bar } from "./svg.js";
 
 export function renderLanguages(theme: Theme, username: string, langs: Array<{ name: string; bytes: number }>) {
   const W=480;

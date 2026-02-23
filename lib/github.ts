@@ -23,17 +23,17 @@ async function ghFetch(url: string, init: RequestInit = {}) {
 
 export async function getUser(username: string) {
   const resp = await ghFetch(`${GH_API}/users/${encodeURIComponent(username)}`);
-  return resp.json();
+  return (await resp.json()) as any;
 }
 
 export async function listRepos(username: string) {
   const resp = await ghFetch(`${GH_API}/users/${encodeURIComponent(username)}/repos?per_page=100&sort=updated`);
-  return resp.json();
+  return (await resp.json()) as any;
 }
 
 export async function getRepoLanguages(owner: string, repo: string) {
   const resp = await ghFetch(`${GH_API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/languages`);
-  return resp.json();
+  return (await resp.json()) as any;
 }
 
 export async function graphQL<T>(query: string, variables: Record<string, any>): Promise<T> {
@@ -53,7 +53,7 @@ export async function graphQL<T>(query: string, variables: Record<string, any>):
     const txt = await resp.text().catch(() => "");
     throw new Error(`GitHub GraphQL error ${resp.status}: ${txt.slice(0, 300)}`);
   }
-  const data = await resp.json();
-  if (data.errors?.length) throw new Error(`GitHub GraphQL errors: ${JSON.stringify(data.errors).slice(0, 300)}`);
-  return data.data as T;
+  const payload = (await resp.json()) as any;
+  if (payload.errors?.length) throw new Error(`GitHub GraphQL errors: ${JSON.stringify(payload.errors).slice(0, 300)}`);
+  return payload.data as T;
 }

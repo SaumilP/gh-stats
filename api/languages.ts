@@ -1,7 +1,7 @@
-import { qFormat, qString, qTheme } from "../lib/query";
-import { setJsonHeaders, setSvgHeaders } from "../lib/http";
-import { listRepos, getRepoLanguages } from "../lib/github";
-import { renderLanguages } from "../cards/languages";
+import { qFormat, qString, qTheme } from "../lib/query.js";
+import { setJsonHeaders, setSvgHeaders } from "../lib/http.js";
+import { listRepos, getRepoLanguages } from "../lib/github.js";
+import { renderLanguages } from "../cards/languages.js";
 
 export default async function handler(req: any, res: any) {
   const username = qString(req.query, "username");
