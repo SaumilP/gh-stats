@@ -9,9 +9,11 @@ export function renderLanguages(
 ) {
   const W=480;
   const rows=Math.min(6, langs.length);
-  const rowStep = opts.compact ? 26 : 28;
-  const barH = opts.compact ? 9 : 10;
-  const barY0 = opts.compact ? 80 : 86;
+  const rowStep = opts.compact ? 24 : 26;
+  const barH = opts.compact ? 7 : 8;
+  const barY0 = opts.compact ? 82 : 88;
+  const barW = W - 36;
+  const labelSize = opts.compact ? 10 : 11;
   const H = barY0 + rows * rowStep + 28;
   let svg=cardFrame(theme,W,H,`Top Languages: ${username}`);
   svg += textLine(theme,18,34,"Top Languages",16,800);
@@ -23,7 +25,7 @@ export function renderLanguages(
     const v = Math.max(0, Number(l.value) || 0);
     const pct=Math.round((v/total)*100);
     const y = barY0 + i * rowStep;
-    svg += bar(theme,18,y,360,barH,v/total,`${l.name} (${pct}%)`);
+    svg += bar(theme,18,y,barW,barH,v/total,`${l.name} (${pct}%)`, { labelSize });
   }
   svg += muted(theme,18,H-16,opts.footer || "Tip: set GITHUB_TOKEN in Vercel for higher rate limits");
   svg += cardFooter();

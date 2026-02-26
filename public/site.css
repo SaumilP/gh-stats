@@ -87,12 +87,13 @@ h1{margin:14px 0 10px; font-size: 44px; line-height: 1.06; letter-spacing:-0.02e
   display:grid;
   grid-template-columns: 1fr 160px auto;
   gap: 12px;
+  align-items: end;
   padding: 14px;
   border-radius: var(--radius);
   background: var(--panel);
   border: 1px solid var(--border);
 }
-@media (max-width: 560px){.controls{grid-template-columns:1fr;}}
+@media (max-width: 460px){.controls{grid-template-columns:1fr;}}
 .field span{display:block; font-size: 12px; color: var(--muted); margin: 0 0 6px; font-weight: 700}
 .field input, .field select{
   width:100%;
@@ -107,6 +108,9 @@ h1{margin:14px 0 10px; font-size: 44px; line-height: 1.06; letter-spacing:-0.02e
 .field input:focus, .field select:focus{border-color: color-mix(in srgb, var(--accent) 60%, var(--border)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);}
 
 .btn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   height: 40px;
   padding: 0 14px;
   border-radius: 12px;
@@ -114,6 +118,7 @@ h1{margin:14px 0 10px; font-size: 44px; line-height: 1.06; letter-spacing:-0.02e
   background: var(--panel2);
   color: var(--text);
   font-weight: 800;
+  line-height: 1;
   cursor: pointer;
   transition: transform .08s ease, background .2s ease, border-color .2s ease;
 }
@@ -217,4 +222,3 @@ pre{margin:0; padding: 16px; overflow:auto}
 }
 .foot .container{display:flex; gap: 10px; align-items:center; justify-content:center; flex-wrap: wrap}
 .foot a{color: var(--text)}
-
