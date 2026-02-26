@@ -8,6 +8,7 @@ import { sendJson, sendSvg } from "../lib/response";
 import { renderRepos } from "../cards/repos";
 import { renderErrorCard } from "../cards/error";
 import { recordLastSuccess } from "../lib/diag";
+import { withCacheKeyVersion } from "../lib/cache-key";
 
 function sortRepos(repos: any[], sort: string) {
   const s = (sort || "stars").toLowerCase();
@@ -51,7 +52,7 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const key = `repos:${username}:${theme}:${format}:${compact ? 1 : 0}:${count}:${sort}`;
+    const key = withCacheKeyVersion(`repos:${username}:${theme}:${format}:${compact ? 1 : 0}:${count}:${sort}`);
     const cache = getCache();
     if (cache && !refresh) {
       const hit = await cacheGet(cache, key);

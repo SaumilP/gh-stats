@@ -57,13 +57,15 @@ export function bar(
   h: number,
   ratio: number,
   label: string,
-  opts: { labelSize?: number } = {},
+  opts: { labelSize?: number; labelBaselineGap?: number } = {},
 ) {
   const t = themeTokens(theme);
   const filled = Math.max(0, Math.min(1, ratio)) * w;
   const fillRx = Math.min(6, Math.max(0, filled / 2));
   const labelSize = Math.max(9, Math.min(12, Math.floor(opts.labelSize ?? 12)));
-  const labelY = y - (h <= 9 ? 8 : 10);
+  // SVG text uses baseline positioning; keep a small gap above the bar to avoid collisions.
+  const baselineGap = Math.max(4, Math.floor(opts.labelBaselineGap ?? Math.max(5, Math.round(labelSize * 0.5))));
+  const labelY = y - baselineGap;
   return `
 <g>
   <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6" fill="${t.chipBg}" stroke="${t.border}" />

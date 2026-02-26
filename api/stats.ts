@@ -8,6 +8,7 @@ import { sendJson, sendSvg } from "../lib/response";
 import { renderStats } from "../cards/stats";
 import { renderErrorCard } from "../cards/error";
 import { recordLastSuccess } from "../lib/diag";
+import { withCacheKeyVersion } from "../lib/cache-key";
 
 export default async function handler(req: any, res: any) {
   const requestId = requestIdFrom(req);
@@ -32,7 +33,7 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const key = `stats:${username}:${theme}:${format}:${compact ? 1 : 0}`;
+    const key = withCacheKeyVersion(`stats:${username}:${theme}:${format}:${compact ? 1 : 0}`);
     const cache = getCache();
     if (cache && !refresh) {
       const hit = await cacheGet(cache, key);

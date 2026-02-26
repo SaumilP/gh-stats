@@ -9,6 +9,7 @@ import { sendJson, sendSvg } from "../lib/response";
 import { renderLanguages } from "../cards/languages";
 import { renderErrorCard } from "../cards/error";
 import { recordLastSuccess } from "../lib/diag";
+import { withCacheKeyVersion } from "../lib/cache-key";
 
 export default async function handler(req: any, res: any) {
   const requestId = requestIdFrom(req);
@@ -39,7 +40,7 @@ export default async function handler(req: any, res: any) {
   try {
     const effectiveMode: "primary" | "bytes" = (mode === "bytes" && !githubTokenPresent()) ? "primary" : mode;
     const cacheModeKey = effectiveMode;
-    const key = `langs:${username}:${theme}:${format}:${compact ? 1 : 0}:${cacheModeKey}:${maxReposForLanguages}`;
+    const key = withCacheKeyVersion(`langs:${username}:${theme}:${format}:${compact ? 1 : 0}:${cacheModeKey}:${maxReposForLanguages}`);
     const cache = getCache();
 
     if (cache && !refresh) {

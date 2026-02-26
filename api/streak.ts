@@ -9,6 +9,7 @@ import { sendJson, sendSvg } from "../lib/response";
 import { renderStreak } from "../cards/streak";
 import { renderErrorCard } from "../cards/error";
 import { recordLastSuccess } from "../lib/diag";
+import { withCacheKeyVersion } from "../lib/cache-key";
 
 type GqlResp = {
   user: { contributionsCollection: { contributionCalendar: { weeks: Array<{ contributionDays: Array<{ date: string; contributionCount: number }> }> } } };
@@ -60,7 +61,7 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const key = `streak:${username}:${theme}:${format}:${compact ? 1 : 0}`;
+    const key = withCacheKeyVersion(`streak:${username}:${theme}:${format}:${compact ? 1 : 0}`);
     const cache = getCache();
     if (cache && !refresh) {
       const hit = await cacheGet(cache, key);
