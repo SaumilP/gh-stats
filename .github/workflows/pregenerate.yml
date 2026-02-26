@@ -3,7 +3,8 @@ name: Pregenerate Cards
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 3 * * *"
+    # Weekly: Sundays 06:00 GMT+2 == 04:00 UTC
+    - cron: "0 4 * * 0"
 
 permissions:
   contents: write
