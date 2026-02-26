@@ -45,10 +45,11 @@ export function chip(theme: Theme, x: number, y: number, label: string) {
 export function bar(theme: Theme, x: number, y: number, w: number, h: number, ratio: number, label: string) {
   const t = themeTokens(theme);
   const filled = Math.max(0, Math.min(1, ratio)) * w;
+  const fillRx = Math.min(6, Math.max(0, filled / 2));
   return `
 <g>
   <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6" fill="${t.chipBg}" stroke="${t.border}" />
-  <rect x="${x}" y="${y}" width="${filled}" height="${h}" rx="6" fill="${t.accent}" opacity="0.85" />
-  <text x="${x}" y="${y-6}" fill="${t.muted}" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">${escapeXml(label)}</text>
+  ${filled > 0.5 ? `<rect x="${x}" y="${y}" width="${filled}" height="${h}" rx="${fillRx}" fill="${t.accent}" opacity="0.85" />` : ""}
+  <text x="${x}" y="${y-10}" fill="${t.muted}" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">${escapeXml(label)}</text>
 </g>`;
 }

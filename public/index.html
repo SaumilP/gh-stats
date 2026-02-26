@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>gh-stats — SVG cards for GitHub READMEs</title>
+    <meta
+      name="description"
+      content="Generate fast, cache-friendly SVG cards (stats, languages, repos, streak) you can embed into your GitHub profile README."
+    />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/site.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div class="container">
+        <a class="brand" href="/">
+          <span class="logo" aria-hidden="true">gh</span>
+          <span class="name">gh-stats</span>
+        </a>
+        <nav class="nav">
+          <a href="#preview">Preview</a>
+          <a href="#embed">Embed</a>
+          <a href="#endpoints">Endpoints</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container">
+          <div class="grid">
+            <div>
+              <p class="kicker">Vercel-friendly • dependency-light • SVG-first</p>
+              <h1>Beautiful GitHub README cards, generated on-demand.</h1>
+              <p class="lead">
+                gh-stats is a minimal serverless service that renders stable SVG cards for your GitHub profile:
+                stats, top repos, languages, and contribution streak.
+              </p>
+
+              <div class="controls" id="controls">
+                <label class="field">
+                  <span>GitHub username</span>
+                  <input id="username" name="username" inputmode="text" autocomplete="off" spellcheck="false" />
+                </label>
+                <label class="field">
+                  <span>Theme</span>
+                  <select id="theme">
+                    <option value="auto">Auto</option>
+                    <option value="dark">Dark</option>
+                    <option value="light">Light</option>
+                  </select>
+                </label>
+                <button class="btn" id="apply" type="button">Update preview</button>
+              </div>
+
+              <div class="cta">
+                <a class="btn primary" href="#embed">Get embed code</a>
+                <a class="btn ghost" href="/api/health">Health</a>
+                <a class="btn ghost" href="/api/limits?format=json">Rate limits</a>
+              </div>
+
+              <p class="fine">
+                Tip: set <code>GITHUB_TOKEN</code> (or <code>GH_TOKEN</code>) on Vercel for higher rate limits. Streak uses GraphQL
+                and will show a friendly “token required” card if missing.
+              </p>
+            </div>
+
+            <div class="panel" aria-label="Card preview panel">
+              <div class="panelTop">
+                <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+                <span class="panelTitle">Preview</span>
+              </div>
+              <div class="panelBody" id="preview">
+                <div class="card">
+                  <img id="img-stats" alt="Stats card preview" loading="lazy" />
+                </div>
+                <div class="card">
+                  <img id="img-langs" alt="Languages card preview" loading="lazy" />
+                </div>
+                <div class="card wide">
+                  <img id="img-repos" alt="Repos card preview" loading="lazy" />
+                </div>
+                <div class="card">
+                  <img id="img-streak" alt="Streak card preview" loading="lazy" />
+                </div>
+              </div>
+              <div class="panelFoot">
+                <span>Cached • ETagged • SVG</span>
+                <span class="sep">·</span>
+                <a href="#endpoints">See endpoints</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="embed">
+        <div class="container">
+          <h2>Embed in your README</h2>
+          <p class="muted">
+            Use a <code>&lt;picture&gt;</code> tag to automatically match the viewer’s theme. Replace <code>YOUR_USER</code> with your
+            username, and <code>YOUR.vercel.app</code> with your deployed domain.
+          </p>
+
+          <div class="codeWrap">
+            <pre><code id="embedCode"></code></pre>
+            <button class="btn small" id="copyEmbed" type="button">Copy</button>
+          </div>
+
+          <div class="note">
+            Want the lowest cost? Use <code>/api/languages?mode=primary</code> (default) and keep your cards cached. You can also
+            pre-generate SVGs nightly and serve them as static files.
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="endpoints">
+        <div class="container">
+          <h2>Endpoints</h2>
+          <div class="cols">
+            <div class="endpoint">
+              <h3><code>/api/stats</code></h3>
+              <p class="muted">Profile stats: repos, followers, stars, forks.</p>
+              <p><code>?username=</code> (required) • <code>?theme=</code> • <code>?format=svg|json</code></p>
+            </div>
+            <div class="endpoint">
+              <h3><code>/api/repos</code></h3>
+              <p class="muted">Top repos. Sorted deterministically.</p>
+              <p><code>?count=1..10</code> • <code>?sort=stars|forks|updated</code></p>
+            </div>
+            <div class="endpoint">
+              <h3><code>/api/languages</code></h3>
+              <p class="muted">Default cheap mode + optional accurate bytes mode.</p>
+              <p><code>?mode=primary</code> (default) • <code>?mode=bytes</code> (cached 24h)</p>
+            </div>
+            <div class="endpoint">
+              <h3><code>/api/streak</code></h3>
+              <p class="muted">Contribution streak via GraphQL.</p>
+              <p><code>GITHUB_TOKEN</code> recommended; otherwise shows a friendly token-required card.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="foot">
+        <div class="container">
+          <span class="muted">gh-stats — built for stable embeds and low-cost hosting.</span>
+          <span class="sep">·</span>
+          <a href="/api/health">Health</a>
+          <span class="sep">·</span>
+          <a href="/api/limits?format=json">Limits</a>
+        </div>
+      </footer>
+    </main>
+
+    <script src="/site.js"></script>
+  </body>
+</html>
+

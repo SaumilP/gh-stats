@@ -291,7 +291,17 @@ If you want effectively **zero Vercel function usage** during README views, you 
    - `GH_STATS_BASE_URL` (your deployed service URL, e.g. `https://YOUR.vercel.app`)
    - `GH_STATS_USERNAME` (your GitHub username)
 2) Enable the `Pregenerate Cards` workflow (`.github/workflows/pregenerate.yml`).
-3) Reference files under `public/cards/*.svg` in your README.
+3) Reference files under `/cards/*.svg` in your README (the project rewrites `/cards/*` → `public/cards/*`).
+
+## 🏠 Home page
+
+This repo includes a simple marketing home page (static) at `/`:
+
+- `public/index.html`
+- `public/site.css`
+- `public/site.js`
+
+It renders a live preview of the cards and generates copy/paste embed snippets.
 
 ## 🤝 Contributing
 
