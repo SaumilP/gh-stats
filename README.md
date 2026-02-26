@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./public/logo.svg" width="140" alt="gh-stats logo" />
+</p>
+
 # gh-stats
 
 📖 **Overview**
@@ -328,8 +332,21 @@ There isn’t separate hosted documentation yet; the best “docs” are the cod
 
 ## 📝 Changelog
 
-Recent commits:
+### Unreleased (working tree)
 
+- Added server-side caching (KV REST / in-memory) + cache-aside policy
+- Added `ETag`/`If-None-Match` support for `304 Not Modified`
+- Reduced GitHub API calls via GraphQL batching (token-aware)
+- Reworked `/api/languages` to default to cheap `mode=primary` with optional `mode=bytes` (limited + cached)
+- Added marketing homepage at `/` with live previews and embed snippet generator
+
+### History (git)
+
+- 2026-02-26 minor changes around the cards (`bc7c699`)
+- 2026-02-26 Adjust pre-generate build for once a week (`c4b1aea`)
+- 2026-02-26 Remove unwanted file; Add index.html page (`b6b14fc`)
+- 2026-02-23 vercel deploy CI added (`6131946`)
+- 2026-02-23 performance improvements; Lower hosting cost and rate-limits applied (`4a097c0`)
 - 2026-02-23 Package fix for successful deployment (`aef549f`)
 - 2026-02-23 Updates for ESM (`5f82912`)
 - 2026-02-23 Aligned TS config for NodeNext ESM; Updated all relrevant imports to include .js (`d4eaff9`)
@@ -340,3 +357,7 @@ Recent commits:
 
 - Uses Node’s built-in `fetch` (no axios) to reduce dependency/advisory exposure.
 - Minimal dependencies: only `typescript` + `@types/node` as dev deps.
+
+## 📄 License
+
+MIT — see `LICENSE`.

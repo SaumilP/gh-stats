@@ -2,6 +2,7 @@
   "name": "gh-stats",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "dev": "node -e \"console.log('Run: npm run vercel:dev')\"",
     "vercel:dev": "vercel dev",
@@ -16,6 +17,6 @@
     "typescript": "5.9.3"
   },
   "engines": {
-    "node": "24.x"
+    "node": ">=22"
   }
 }

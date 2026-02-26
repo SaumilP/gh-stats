@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320" role="img" aria-label="gh-stats logo">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#58a6ff"/>
+      <stop offset="1" stop-color="#a78bfa"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <rect x="26" y="26" width="268" height="268" rx="72" fill="url(#bg)" filter="url(#shadow)"/>
+  <path d="M60 78c34-32 76-40 126-30 28 6 52 20 74 44" fill="none" stroke="url(#shine)" stroke-width="18" stroke-linecap="round" opacity="0.85"/>
+
+  <!-- Card -->
+  <g transform="translate(66 92)">
+    <rect x="0" y="0" width="188" height="136" rx="22" fill="rgba(10,18,32,0.22)" stroke="rgba(255,255,255,0.45)" stroke-opacity="0.55"/>
+    <rect x="14" y="18" width="88" height="10" rx="6" fill="rgba(255,255,255,0.72)"/>
+    <rect x="14" y="42" width="62" height="8" rx="5" fill="rgba(255,255,255,0.52)"/>
+
+    <!-- Bars -->
+    <g transform="translate(14 66)">
+      <rect x="0" y="0" width="160" height="12" rx="7" fill="rgba(255,255,255,0.18)"/>
+      <rect x="0" y="0" width="110" height="12" rx="7" fill="rgba(255,255,255,0.78)"/>
+
+      <rect x="0" y="26" width="160" height="12" rx="7" fill="rgba(255,255,255,0.18)"/>
+      <rect x="0" y="26" width="84" height="12" rx="7" fill="rgba(255,255,255,0.62)"/>
+
+      <rect x="0" y="52" width="160" height="12" rx="7" fill="rgba(255,255,255,0.18)"/>
+      <rect x="0" y="52" width="132" height="12" rx="7" fill="rgba(255,255,255,0.70)"/>
+    </g>
+  </g>
+
+  <!-- Subtle mark -->
+  <path d="M216 220c-18 22-44 34-78 34" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="14" stroke-linecap="round"/>
+</svg>
+

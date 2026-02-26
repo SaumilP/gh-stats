@@ -54,12 +54,10 @@ code{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Libera
   height:64px;
 }
 .brand{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:0.2px}
-.logo{
-  width:30px; height:30px; display:inline-grid; place-items:center;
-  border-radius: 10px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: white;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.18);
+.logoImg{
+  width:30px;
+  height:30px;
+  display:block;
 }
 .name{font-size: 15px}
 .nav{display:flex; gap:16px; color: var(--muted); font-weight:600; font-size: 14px}
@@ -78,6 +76,13 @@ code{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Libera
   color: var(--muted);
   font-weight: 700;
   font-size: 13px;
+}
+.heroMark{display:flex; align-items:center; gap:12px}
+.heroLogo{
+  width:42px;
+  height:42px;
+  display:block;
+  filter: drop-shadow(0 12px 24px rgba(0,0,0,0.18));
 }
 h1{margin:14px 0 10px; font-size: 44px; line-height: 1.06; letter-spacing:-0.02em}
 @media (max-width: 560px){h1{font-size: 36px}}
