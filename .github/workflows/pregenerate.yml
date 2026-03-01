@@ -71,14 +71,23 @@ jobs:
       - name: Generate SVG cards
         run: node scripts/pregenerate.mjs
 
+      - name: Verify generated cards
+        shell: bash
+        run: ls -la public/cards
+
       - name: Commit changes (if any)
         run: |
-          if git diff --quiet; then
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Stage first: `git diff` ignores untracked files, but `git diff --cached`
+          # will detect newly generated SVGs once they are in the index.
+          git add -A public/cards
+
+          if git diff --cached --quiet; then
             echo "No changes."
             exit 0
           fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/cards
+
           git commit -m "chore: pregenerate cards"
           git push
