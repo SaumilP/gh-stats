@@ -16,6 +16,75 @@ jobs:
         with:
           node-version: "24"
 
+      # Resolve Vercel auth/config from (1) existing env, (2) repo/environment secrets,
+      # or (3) repo variables. Note: VERCEL_TOKEN should be stored as a secret.
+      - name: Resolve Vercel env
+        shell: bash
+        env:
+          VERCEL_TOKEN_SECRET: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID_SECRET: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID_SECRET: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN_VAR: ${{ vars.VERCEL_TOKEN }}
+          VERCEL_ORG_ID_VAR: ${{ vars.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID_VAR: ${{ vars.VERCEL_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+
+          token_src="missing"
+          org_src="missing"
+          project_src="missing"
+
+          if [ -n "${VERCEL_TOKEN:-}" ]; then
+            token_src="env"
+          elif [ -n "${VERCEL_TOKEN_SECRET:-}" ]; then
+            echo "VERCEL_TOKEN=${VERCEL_TOKEN_SECRET}" >> "$GITHUB_ENV"
+            token_src="secret"
+          elif [ -n "${VERCEL_TOKEN_VAR:-}" ]; then
+            echo "VERCEL_TOKEN=${VERCEL_TOKEN_VAR}" >> "$GITHUB_ENV"
+            token_src="var"
+          fi
+
+          if [ -n "${VERCEL_ORG_ID:-}" ]; then
+            org_src="env"
+          elif [ -n "${VERCEL_ORG_ID_SECRET:-}" ]; then
+            echo "VERCEL_ORG_ID=${VERCEL_ORG_ID_SECRET}" >> "$GITHUB_ENV"
+            org_src="secret"
+          elif [ -n "${VERCEL_ORG_ID_VAR:-}" ]; then
+            echo "VERCEL_ORG_ID=${VERCEL_ORG_ID_VAR}" >> "$GITHUB_ENV"
+            org_src="var"
+          fi
+
+          if [ -n "${VERCEL_PROJECT_ID:-}" ]; then
+            project_src="env"
+          elif [ -n "${VERCEL_PROJECT_ID_SECRET:-}" ]; then
+            echo "VERCEL_PROJECT_ID=${VERCEL_PROJECT_ID_SECRET}" >> "$GITHUB_ENV"
+            project_src="secret"
+          elif [ -n "${VERCEL_PROJECT_ID_VAR:-}" ]; then
+            echo "VERCEL_PROJECT_ID=${VERCEL_PROJECT_ID_VAR}" >> "$GITHUB_ENV"
+            project_src="var"
+          fi
+
+          echo "VERCEL_TOKEN_SOURCE=${token_src}" >> "$GITHUB_ENV"
+          echo "VERCEL_ORG_ID_SOURCE=${org_src}" >> "$GITHUB_ENV"
+          echo "VERCEL_PROJECT_ID_SOURCE=${project_src}" >> "$GITHUB_ENV"
+
+          if [ "$token_src" = "missing" ]; then
+            echo "Missing VERCEL_TOKEN. Set it as a repository secret (preferred) or variable." >&2
+            exit 2
+          fi
+
+          if [ "$org_src" = "missing" ] || [ "$project_src" = "missing" ]; then
+            echo "Missing VERCEL_ORG_ID and/or VERCEL_PROJECT_ID. Set them as repository secrets/variables for non-interactive deploys." >&2
+            exit 2
+          fi
+
+      # - name: Debug required env (no values)
+      #   shell: bash
+      #   run: |
+      #     test -n "${VERCEL_TOKEN:-}" && echo "VERCEL_TOKEN set (${VERCEL_TOKEN_SOURCE:-unknown})" || echo "VERCEL_TOKEN missing (${VERCEL_TOKEN_SOURCE:-missing})"
+      #     test -n "${VERCEL_ORG_ID:-}" && echo "VERCEL_ORG_ID set (${VERCEL_ORG_ID_SOURCE:-unknown})" || echo "VERCEL_ORG_ID not set (${VERCEL_ORG_ID_SOURCE:-missing})"
+      #     test -n "${VERCEL_PROJECT_ID:-}" && echo "VERCEL_PROJECT_ID set (${VERCEL_PROJECT_ID_SOURCE:-unknown})" || echo "VERCEL_PROJECT_ID not set (${VERCEL_PROJECT_ID_SOURCE:-missing})"
+
       - name: Install deps
         run: npm ci
 
@@ -26,13 +95,10 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Pull Vercel env (optional but recommended)
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
 
       - name: Build (optional if you have a build step)
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --prod --token="$VERCEL_TOKEN"
 
       - name: Deploy to Production
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"

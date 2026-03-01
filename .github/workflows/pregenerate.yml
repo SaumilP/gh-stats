@@ -57,26 +57,21 @@ jobs:
           echo "GH_STATS_BASE_URL_SOURCE=${base_url_src}" >> "$GITHUB_ENV"
           echo "GH_STATS_USERNAME_SOURCE=${username_src}" >> "$GITHUB_ENV"
 
-          # Avoid failing PRs (especially from forks), where secrets are not available.
-          if [ "${GITHUB_EVENT_NAME}" != "pull_request" ]; then
-            if [ "$base_url_src" = "missing" ] || [ "$username_src" = "missing" ]; then
-              echo "Missing GH stats config. Set env vars, repository secrets, or repository variables." >&2
-              exit 2
-            fi
+          if [ "$base_url_src" = "missing" ] || [ "$username_src" = "missing" ]; then
+            echo "Missing GH stats config. Set env vars, repository secrets, or repository variables." >&2
+            exit 2
           fi
 
-      - name: Debug required env (no values)
-        shell: bash
-        run: |
-          test -n "${GH_STATS_BASE_URL:-}" && echo "GH_STATS_BASE_URL set (${GH_STATS_BASE_URL_SOURCE:-unknown})" || echo "GH_STATS_BASE_URL missing (${GH_STATS_BASE_URL_SOURCE:-missing})"
-          test -n "${GH_STATS_USERNAME:-}" && echo "GH_STATS_USERNAME set (${GH_STATS_USERNAME_SOURCE:-unknown})" || echo "GH_STATS_USERNAME missing (${GH_STATS_USERNAME_SOURCE:-missing})"
+      # - name: Debug required env (no values)
+      #   shell: bash
+      #   run: |
+      #     test -n "${GH_STATS_BASE_URL:-}" && echo "GH_STATS_BASE_URL set (${GH_STATS_BASE_URL_SOURCE:-unknown})" || echo "GH_STATS_BASE_URL missing (${GH_STATS_BASE_URL_SOURCE:-missing})"
+      #     test -n "${GH_STATS_USERNAME:-}" && echo "GH_STATS_USERNAME set (${GH_STATS_USERNAME_SOURCE:-unknown})" || echo "GH_STATS_USERNAME missing (${GH_STATS_USERNAME_SOURCE:-missing})"
 
       - name: Generate SVG cards
-        if: github.event_name != 'pull_request'
         run: node scripts/pregenerate.mjs
 
       - name: Commit changes (if any)
-        if: github.event_name != 'pull_request'
         run: |
           if git diff --quiet; then
             echo "No changes."
