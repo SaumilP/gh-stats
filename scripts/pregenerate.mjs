@@ -17,7 +17,7 @@ const themes = ["dark", "light"];
 const endpoints = [
   {
     name: "stats",
-    path: ({ username, theme }) => `/api/repos?username=${username}&theme=${theme}&`,
+    path: ({ username, theme }) => `/api/stats?username=${username}&theme=${theme}&`,
   },
   {
     name: "repos",
