@@ -19,20 +19,69 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
+
+      # Resolve required inputs from (1) existing env, (2) repo/environment secrets,
+      # or (3) repo variables. This makes the workflow resilient across setups.
+      - name: Resolve GH stats env
+        shell: bash
+        env:
+          GH_STATS_BASE_URL_SECRET: ${{ secrets.GH_STATS_BASE_URL }}
+          GH_STATS_USERNAME_SECRET: ${{ secrets.GH_STATS_USERNAME }}
+          GH_STATS_BASE_URL_VAR: ${{ vars.GH_STATS_BASE_URL }}
+          GH_STATS_USERNAME_VAR: ${{ vars.GH_STATS_USERNAME }}
+        run: |
+          set -euo pipefail
+
+          base_url_src="missing"
+          username_src="missing"
+
+          if [ -n "${GH_STATS_BASE_URL:-}" ]; then
+            base_url_src="env"
+          elif [ -n "${GH_STATS_BASE_URL_SECRET:-}" ]; then
+            echo "GH_STATS_BASE_URL=${GH_STATS_BASE_URL_SECRET}" >> "$GITHUB_ENV"
+            base_url_src="secret"
+          elif [ -n "${GH_STATS_BASE_URL_VAR:-}" ]; then
+            echo "GH_STATS_BASE_URL=${GH_STATS_BASE_URL_VAR}" >> "$GITHUB_ENV"
+            base_url_src="var"
+          fi
+
+          if [ -n "${GH_STATS_USERNAME:-}" ]; then
+            username_src="env"
+          elif [ -n "${GH_STATS_USERNAME_SECRET:-}" ]; then
+            echo "GH_STATS_USERNAME=${GH_STATS_USERNAME_SECRET}" >> "$GITHUB_ENV"
+            username_src="secret"
+          elif [ -n "${GH_STATS_USERNAME_VAR:-}" ]; then
+            echo "GH_STATS_USERNAME=${GH_STATS_USERNAME_VAR}" >> "$GITHUB_ENV"
+            username_src="var"
+          fi
+
+          echo "GH_STATS_BASE_URL_SOURCE=${base_url_src}" >> "$GITHUB_ENV"
+          echo "GH_STATS_USERNAME_SOURCE=${username_src}" >> "$GITHUB_ENV"
+
+          # Avoid failing PRs (especially from forks), where secrets are not available.
+          if [ "${GITHUB_EVENT_NAME}" != "pull_request" ]; then
+            if [ "$base_url_src" = "missing" ] || [ "$username_src" = "missing" ]; then
+              echo "Missing GH stats config. Set env vars, repository secrets, or repository variables." >&2
+              exit 2
+            fi
+          fi
+
       - name: Debug required env (no values)
         shell: bash
         run: |
-          test -n "${GH_STATS_BASE_URL:-}" && echo "GH_STATS_BASE_URL set" || echo "GH_STATS_BASE_URL missing 🫨"
-          test -n "${GH_STATS_USERNAME:-}" && echo "GH_STATS_USERNAME set" || echo "GH_STATS_USERNAME missing 🫨"
+          test -n "${GH_STATS_BASE_URL:-}" && echo "GH_STATS_BASE_URL set (${GH_STATS_BASE_URL_SOURCE:-unknown})" || echo "GH_STATS_BASE_URL missing (${GH_STATS_BASE_URL_SOURCE:-missing})"
+          test -n "${GH_STATS_USERNAME:-}" && echo "GH_STATS_USERNAME set (${GH_STATS_USERNAME_SOURCE:-unknown})" || echo "GH_STATS_USERNAME missing (${GH_STATS_USERNAME_SOURCE:-missing})"
+
       - name: Generate SVG cards
-        env:
-          GH_STATS_BASE_URL: ${{ secrets.GH_STATS_BASE_URL }}
-          GH_STATS_USERNAME: ${{ secrets.GH_STATS_USERNAME }}
+        if: github.event_name != 'pull_request'
         run: node scripts/pregenerate.mjs
+
       - name: Commit changes (if any)
+        if: github.event_name != 'pull_request'
         run: |
           if git diff --quiet; then
             echo "No changes."
