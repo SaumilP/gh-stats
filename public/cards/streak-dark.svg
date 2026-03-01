@@ -1,0 +1,23 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="165" role="img" aria-label="Contribution Streak: SaumilP">
+  <defs>
+    <style>
+      @keyframes ghstatsGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+      .ghstats-bar-fill { transform-box: fill-box; transform-origin: left center; animation: ghstatsGrow 900ms cubic-bezier(.2,.8,.2,1) both; }
+      @media (prefers-reduced-motion: reduce) { .ghstats-bar-fill { animation: none; } }
+    </style>
+  </defs>
+  <rect x="0.5" y="0.5" width="479" height="164" rx="14" fill="#0d1117" stroke="#30363d" />
+<text x="18" y="34" fill="#e6edf3" font-size="16" font-weight="800" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">Contribution Streak</text><text x="18" y="54" fill="#9da7b1" font-size="12" font-weight="400" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">@SaumilP • last 365 days</text>
+<g>
+  <rect x="18" y="74" width="116.8" height="22" rx="10" fill="#161b22" stroke="#30363d" />
+  <text x="26" y="90" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">🔥 Current: 1d</text>
+</g>
+<g>
+  <rect x="144.8" y="74" width="116.8" height="22" rx="10" fill="#161b22" stroke="#30363d" />
+  <text x="152.8" y="90" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">🏆 Longest: 4d</text>
+</g>
+<g>
+  <rect x="18" y="106" width="217.6" height="22" rx="10" fill="#161b22" stroke="#30363d" />
+  <text x="26" y="122" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">✅ Total days contributed: 31</text>
+</g><text x="18" y="149" fill="#9da7b1" font-size="12" font-weight="400" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">Requires GITHUB_TOKEN (GraphQL) for accurate data</text></svg>

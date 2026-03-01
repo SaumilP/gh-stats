@@ -1,0 +1,41 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="254" role="img" aria-label="Top Languages: SaumilP">
+  <defs>
+    <style>
+      @keyframes ghstatsGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+      .ghstats-bar-fill { transform-box: fill-box; transform-origin: left center; animation: ghstatsGrow 900ms cubic-bezier(.2,.8,.2,1) both; }
+      @media (prefers-reduced-motion: reduce) { .ghstats-bar-fill { animation: none; } }
+    </style>
+  </defs>
+  <rect x="0.5" y="0.5" width="479" height="253" rx="14" fill="#0d1117" stroke="#30363d" />
+<text x="18" y="34" fill="#e6edf3" font-size="16" font-weight="800" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">Top Languages</text><text x="18" y="54" fill="#9da7b1" font-size="12" font-weight="400" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">@SaumilP • primary language • weighted by stars</text>
+<g>
+  <rect x="18" y="82" width="444" height="7" rx="6" fill="#161b22" stroke="#30363d" />
+  <rect class="ghstats-bar-fill" x="18" y="82" width="148" height="7" rx="6" fill="#58a6ff" opacity="0.85" />
+  <text x="18" y="77" fill="#9da7b1" font-size="10" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">Java (33%)</text>
+</g>
+<g>
+  <rect x="18" y="106" width="444" height="7" rx="6" fill="#161b22" stroke="#30363d" />
+  <rect class="ghstats-bar-fill" x="18" y="106" width="98.66666666666666" height="7" rx="6" fill="#58a6ff" opacity="0.85" />
+  <text x="18" y="101" fill="#9da7b1" font-size="10" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">Python (22%)</text>
+</g>
+<g>
+  <rect x="18" y="130" width="444" height="7" rx="6" fill="#161b22" stroke="#30363d" />
+  <rect class="ghstats-bar-fill" x="18" y="130" width="98.66666666666666" height="7" rx="6" fill="#58a6ff" opacity="0.85" />
+  <text x="18" y="125" fill="#9da7b1" font-size="10" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">Rust (22%)</text>
+</g>
+<g>
+  <rect x="18" y="154" width="444" height="7" rx="6" fill="#161b22" stroke="#30363d" />
+  <rect class="ghstats-bar-fill" x="18" y="154" width="49.33333333333333" height="7" rx="6" fill="#58a6ff" opacity="0.85" />
+  <text x="18" y="149" fill="#9da7b1" font-size="10" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">TypeScript (11%)</text>
+</g>
+<g>
+  <rect x="18" y="178" width="444" height="7" rx="6" fill="#161b22" stroke="#30363d" />
+  <rect class="ghstats-bar-fill" x="18" y="178" width="24.666666666666664" height="7" rx="6" fill="#58a6ff" opacity="0.85" />
+  <text x="18" y="173" fill="#9da7b1" font-size="10" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">JavaScript (6%)</text>
+</g>
+<g>
+  <rect x="18" y="202" width="444" height="7" rx="6" fill="#161b22" stroke="#30363d" />
+  <rect class="ghstats-bar-fill" x="18" y="202" width="24.666666666666664" height="7" rx="6" fill="#58a6ff" opacity="0.85" />
+  <text x="18" y="197" fill="#9da7b1" font-size="10" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">Scala (6%)</text>
+</g><text x="18" y="238" fill="#9da7b1" font-size="12" font-weight="400" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">Tip: set GITHUB_TOKEN in Vercel for higher rate limits</text></svg>
