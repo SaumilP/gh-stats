@@ -26,7 +26,7 @@ It currently ships four “cards”:
 - 🧷 `ETag` + `If-None-Match` support (304 responses reduce bandwidth)
 - 🧯 SVG error cards (stable embeds; no plain-text failures)
 
-## 🧰 Engineering Snapshot
+## 🧰 Generated Example Snapshot
 
 <table>
   <tr>
