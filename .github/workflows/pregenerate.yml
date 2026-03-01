@@ -1,10 +1,15 @@
 name: Pregenerate Cards
 
+# on:
+#   workflow_dispatch:
+#   schedule:
+#     # Weekly: Sundays 06:00 GMT+2 == 04:00 UTC
+#     - cron: "0 4 * * 0"
+
 on:
-  workflow_dispatch:
-  schedule:
-    # Weekly: Sundays 06:00 GMT+2 == 04:00 UTC
-    - cron: "0 4 * * 0"
+  push:
+    branches: ["**"]
+  pull_request:
 
 permissions:
   contents: write
@@ -17,10 +22,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
+      - name: Debug required env (no values)
+        shell: bash
+        run: |
+          test -n "${GH_STATS_BASE_URL:-}" && echo "GH_STATS_BASE_URL set" || echo "GH_STATS_BASE_URL missing 🫨"
+          test -n "${GH_STATS_USERNAME:-}" && echo "GH_STATS_USERNAME set" || echo "GH_STATS_USERNAME missing 🫨"
       - name: Generate SVG cards
         env:
-          GH_STATS_BASE_URL: ${{ vars.GH_STATS_BASE_URL }}
-          GH_STATS_USERNAME: ${{ vars.GH_STATS_USERNAME }}
+          GH_STATS_BASE_URL: ${{ secrets.GH_STATS_BASE_URL }}
+          GH_STATS_USERNAME: ${{ secrets.GH_STATS_USERNAME }}
         run: node scripts/pregenerate.mjs
       - name: Commit changes (if any)
         run: |
