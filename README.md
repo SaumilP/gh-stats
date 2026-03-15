@@ -1,32 +1,48 @@
-<p align="center">
-  <img src="./public/logo.svg" width="140" alt="gh-stats logo" />
-</p>
-
 # gh-stats
 
-📖 **Overview**
+<p align="center">
+  <img src="./public/logo.svg" alt="gh-stats logo" width="120" />
+</p>
 
-`gh-stats` is a minimal, dependency-light Vercel serverless service that generates **SVG cards** (or JSON) you can embed directly into your GitHub profile README. It’s designed to be easy to self-host, fast to render, and simple to understand/modify.
+<p align="center">
+  <strong>SVG-first GitHub README cards, self-hosted on Vercel.</strong><br/>
+  Lightweight, dependency-light, cache-aware, and designed for stable embeds.
+</p>
 
-It currently ships four “cards”:
+<p align="center">
+  <a href="https://github.com/SaumilP/gh-stats">Repository</a>
+  ·
+  <a href="https://gh-stats-gen.vercel.app/">Live Demo</a>
+  ·
+  <a href="#features">Features</a>
+  ·
+  <a href="#deployment">Deployment</a>
+  ·
+  <a href="#api-endpoints">API Endpoints</a>
+</p>
 
-- 📊 **Stats** (repos, followers, total stars, total forks)
-- 🧠 **Languages** (default: cheap “primary language” aggregation; optional accurate bytes mode)
-- 📦 **Repos** (top repos by stars/forks/updated)
-- 🔥 **Streak** (contribution streak via GitHub GraphQL; token recommended)
+---
 
-✨ **Features**
+## Overview
 
-- 🖼️ SVG-first output (ideal for GitHub README embeds)
-- 🧾 Optional `format=json` for debugging / integrations
-- 🎨 `dark`/`light` themes
-- ⚡ Vercel-friendly: `/api/*` serverless functions (Node.js 24 runtime)
-- 🧰 No runtime deps (only `typescript` + `@types/node` as dev deps)
-- 🗄️ CDN cache headers + server-side cache (KV REST / in-memory)
-- 🧷 `ETag` + `If-None-Match` support (304 responses reduce bandwidth)
-- 🧯 SVG error cards (stable embeds; no plain-text failures)
+`gh-stats` is a minimal Vercel serverless service that generates GitHub profile cards as SVG or JSON output. It is built for profile READMEs, personal dashboards, and low-cost self-hosted usage.
 
-## 🧰 Generated Example Snapshot
+The project currently focuses on a pragmatic feature set:
+
+- GitHub stats card
+- Top languages card
+- Top repositories card
+- Contribution streak card
+- Theme-aware output for dark and light embeds
+- JSON output for debugging and integrations
+- Server-side and CDN caching support
+- Static pre-generation workflow for near-zero runtime cost
+
+The latest repository changes also introduce broader card foundations and presentation capabilities, including pin/gist/WakaTime-oriented renderers, expanded theme controls, richer language layouts, and extended diagnostics readiness.
+
+---
+
+## Example snapshots
 
 <table>
   <tr>
@@ -39,7 +55,7 @@ It currently ships four “cards”:
     <td width="50%">
       <picture>
         <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/SaumilP/gh-stats/refs/heads/main/public/cards/languages-dark.svg">
-        <img alt="Top languages card" src="https://raw.githubusercontent.com/SaumilP/gh-stats/refs/heads/main/public/cards/languages-light.svg" width="100%">
+        <img alt="Languages card" src="https://raw.githubusercontent.com/SaumilP/gh-stats/refs/heads/main/public/cards/languages-light.svg" width="100%">
       </picture>
     </td>
   </tr>
@@ -59,338 +75,341 @@ It currently ships four “cards”:
   </tr>
 </table>
 
-✅ **Requirements**
+---
 
-- Node.js `v24.13.1` for local dev (see `.nvmrc`)
-- Vercel Functions runtime is pinned separately (see `vercel.json`)
-- (Recommended) Vercel CLI for local dev: `npm i -g vercel`
-- (Recommended) GitHub token for higher rate limits: `GITHUB_TOKEN` or `GH_TOKEN`
+## Features
 
-🚀 **Installation**
+- SVG-first output for clean GitHub README embedding
+- Optional `format=json` output for diagnostics and downstream integrations
+- Vercel serverless-friendly structure using `/api/*`
+- TypeScript codebase with minimal runtime dependency surface
+- CDN caching plus server-side cache support
+- `ETag` and `If-None-Match` support for efficient repeat requests
+- Stable SVG error cards instead of raw text failures
+- Static pregeneration support for repository-committed SVG assets
+- Theme support including built-in named themes and custom color overrides
+- Configurable borders, border radius, icon colors, title colors, text colors, and background colors/gradients
+- Enhanced language card layouts such as `normal`, `compact`, `donut`, `donut-vertical`, and `pie`
+- Foundations for additional card types such as pinned repository, gist, and WakaTime renderers
 
-```bash
-npm install
+---
+
+## Why this project
+
+`gh-stats` is positioned as a lean, understandable, self-hosted alternative for developers who want:
+
+- lower hosting complexity
+- straightforward TypeScript source code
+- tighter control over GitHub token usage
+- lighter operational cost through caching and pregeneration
+- a smaller code surface that is easier to extend for personal branding
+
+---
+
+## Live usage
+
+The hosted generator lets you preview cards and generate embed snippets from the browser:
+
+- Live app: `https://gh-stats-gen.vercel.app/`
+- Health check: `https://gh-stats-gen.vercel.app/api/health`
+- Limits: `https://gh-stats-gen.vercel.app/api/limits?format=json`
+
+---
+
+## API endpoints
+
+### `/api/stats`
+
+Renders a GitHub profile stats card.
+
+**Purpose**
+- Repositories
+- Followers
+- Total stars
+- Total forks
+
+**Examples**
+
+```text
+/api/stats?username=octocat&theme=dark
+/api/stats?username=octocat&format=json
 ```
 
-🛠️ **Usage**
+### `/api/repos`
 
-Local dev (Vercel dev server):
+Renders a top repositories card for public repositories.
 
-```bash
-npm install -g vercel
-npm run vercel:dev
+**Options**
+- `count=1..10`
+- `sort=stars|forks|updated`
+
+**Examples**
+
+```text
+/api/repos?username=octocat&theme=dark&count=6&sort=stars
+/api/repos?username=octocat&format=json&sort=updated
 ```
 
-Then hit endpoints like:
+### `/api/languages`
 
-- `http://localhost:3000/api/health`
-- `http://localhost:3000/api/stats?username=octocat&theme=dark`
+Renders a top languages card.
 
-Deploy:
+**Modes**
+- `mode=primary` — lower-cost default mode
+- `mode=bytes` — more accurate mode for language distribution
+
+**Examples**
+
+```text
+/api/languages?username=octocat&theme=dark
+/api/languages?username=octocat&mode=bytes&theme=dark
+/api/languages?username=octocat&format=json&mode=primary
+```
+
+### `/api/streak`
+
+Renders a contribution streak card using GitHub GraphQL contribution data.
+
+**Examples**
+
+```text
+/api/streak?username=octocat&theme=dark
+/api/streak?username=octocat&format=json
+```
+
+### `/api/health`
+
+Returns service diagnostics information.
+
+### `/api/limits`
+
+Returns rate limit diagnostics in JSON form.
+
+---
+
+## Shared query parameters
+
+Most endpoints support these parameters:
+
+```text
+username       required GitHub username
+theme          dark | light | default | transparent | radical | merko | gruvbox | tokyonight | onedark | cobalt | synthwave | highcontrast | dracula
+format         svg | json
+cacheSeconds   cache header override within allowed clamp
+refresh        1 to bypass server-side cache
+compact        1 for smaller output where supported
+```
+
+### Theme customization
+
+The codebase now supports additional presentation controls such as:
+
+```text
+title_color
+text_color
+icon_color
+border_color
+bg_color
+hide_border
+border_radius
+```
+
+`bg_color` also supports gradient-style input in the theme resolver.
+
+### Languages-specific presentation controls
+
+The language renderer supports broader layout options:
+
+```text
+layout=normal
+layout=compact
+layout=donut
+layout=donut-vertical
+layout=pie
+hide_progress=true
+maxReposForLanguages=5..50
+```
+
+---
+
+## README embed examples
+
+### Basic stats card
+
+```md
+![GitHub stats](https://YOUR_DOMAIN/api/stats?username=YOUR_USERNAME&theme=dark)
+```
+
+### Theme-aware `<picture>` embed
+
+```html
+<picture>
+  <source
+    srcset="https://YOUR_DOMAIN/api/stats?username=YOUR_USERNAME&theme=dark"
+    media="(prefers-color-scheme: dark)"
+  />
+  <img
+    src="https://YOUR_DOMAIN/api/stats?username=YOUR_USERNAME&theme=light"
+    alt="GitHub stats card"
+  />
+</picture>
+```
+
+### Languages + repos pairing
+
+```html
+<a href="https://github.com/YOUR_USERNAME">
+  <img height="180" src="https://YOUR_DOMAIN/api/stats?username=YOUR_USERNAME&theme=dark" />
+</a>
+<a href="https://github.com/YOUR_USERNAME?tab=repositories">
+  <img height="180" src="https://YOUR_DOMAIN/api/languages?username=YOUR_USERNAME&theme=dark&layout=compact" />
+</a>
+```
+
+### Top repos card
+
+```md
+![Top repositories](https://YOUR_DOMAIN/api/repos?username=YOUR_USERNAME&theme=dark&count=6&sort=stars)
+```
+
+### Streak card
+
+```md
+![Contribution streak](https://YOUR_DOMAIN/api/streak?username=YOUR_USERNAME&theme=dark)
+```
+
+---
+
+## Installation
+
+```bash
+$> npm install
+```
+
+For local Vercel development:
+
+```bash
+$> npm install -g vercel
+$> npm run vercel:dev
+```
+
+---
+
+## Deployment
+
+### Vercel
 
 ```bash
 vercel
 ```
 
-📦 **Technologies**
-
-- TypeScript
-- Vercel Serverless Functions (Node.js 24 runtime via `vercel.json` + `package.json#engines`)
-- GitHub REST API + GitHub GraphQL API (for streak)
-
-🔧 **Configuration**
-
-Environment variables:
-
-- `GITHUB_TOKEN` (preferred) or `GH_TOKEN`
-  - Enables `/api/streak` (GraphQL requires auth)
-  - Improves REST rate limits for `/api/stats`, `/api/repos`, `/api/languages`
-
-- Cache (recommended for reliability + lower cost)
-  - `CACHE_ENABLED=true|false` (default: `true`)
-  - `KV_REST_API_URL` + `KV_REST_API_TOKEN` (Vercel KV / Upstash Redis REST)
-  - TTLs (seconds):
-    - `CACHE_TTL_STATS=21600` (6h)
-    - `CACHE_TTL_REPOS=21600` (6h)
-    - `CACHE_TTL_LANGUAGES=86400` (24h)
-    - `CACHE_TTL_STREAK=21600` (6h)
-
-Vercel setup:
-
-- Project Settings → Environment Variables → add `GITHUB_TOKEN`
-- (Optional) Add `KV_REST_API_URL` + `KV_REST_API_TOKEN` for server-side caching
-- `vercel.json` pins function runtime to `nodejs24.x` for `api/**/*.ts`
-
-## 🚏 Endpoints
-
-### `/api/health`
-
-Health check.
-
-- Example: `/api/health`
-- Output: JSON only (`format=json`)
-- Includes cache status, token presence (boolean only), last success timestamps, and (if token present) GitHub rate limit summary.
-
-### `/api/limits` (optional)
-
-Rate limit diagnostics (JSON only).
-
-- Example: `/api/limits?format=json`
-
-### `/api/stats`
-
-Generates a “GitHub Stats” card.
-
-- With `GITHUB_TOKEN`: uses GitHub GraphQL (single request) to fetch followers + recent repos and totals stars/forks.
-- Without token: falls back to GitHub REST (`/users/:username` + `/users/:username/repos`).
-
-Examples:
-
-- `/api/stats?username=octocat&theme=dark`
-- `/api/stats?username=octocat&format=json`
-
-### `/api/repos`
-
-Generates a “Top Repositories” card from public repos, filtering out forks and archived repos, then sorting.
-
-Query params:
-
-- `count` (default `6`, range `1..10`)
-- `sort` = `stars|forks|updated` (default `stars`)
-
-Examples:
-
-- `/api/repos?username=octocat&theme=dark&count=6&sort=stars`
-- `/api/repos?username=octocat&format=json&sort=updated`
-
-### `/api/languages`
-
-Generates a “Top Languages” card with two modes:
-
-- `mode=primary` (default, cheap): aggregates each repo’s *primary language* (1 GitHub call per request).
-- `mode=bytes` (optional, accurate/expensive): calls the per-repo languages endpoint for up to the top 10 repos by stars, concurrency-limited to 2. Cached for ≥24h.
-
-Examples:
-
-- `/api/languages?username=octocat&theme=dark` (primary mode)
-- `/api/languages?username=octocat&mode=bytes&theme=dark` (accurate bytes mode)
-- `/api/languages?username=octocat&format=json&mode=primary`
-
-Notes:
-- If `mode=bytes` is requested without a token, it automatically falls back to `mode=primary`.
-
-### `/api/streak`
-
-Generates a “Contribution Streak” card using GitHub GraphQL `contributionCalendar` for the last 365 days.
-
-Requires:
-
-- `GITHUB_TOKEN` (or `GH_TOKEN`) set in env vars.
-  - If missing, the endpoint returns a valid SVG “Token required” card (no 500s).
-
-Examples:
-
-- `/api/streak?username=octocat&theme=dark`
-- `/api/streak?username=octocat&format=json`
-
-## 🔌 Common Query Params
-
-Shared across most endpoints:
-
-- `username` (required)
-- `theme` = `dark|light` (default: `dark`)
-- `format` = `svg|json` (default: `svg`)
-- `cacheSeconds` (optional) — clamps `300..86400` (affects CDN cache header)
-- `refresh=1` (optional) — bypass server-side cache for a manual refresh
-- `compact=1` (optional) — smaller SVG for lower bandwidth
-
-Languages-only:
-
-- `mode` = `primary|bytes` (default: `primary`)
-- `maxReposForLanguages` (default `30`, clamps `5..50`)
-
-## 🧩 Embed Examples (GitHub README)
-
-Use a `<picture>` tag for automatic theme switching:
-
-```html
-<picture>
-  <source srcset="https://YOUR.vercel.app/api/stats?username=YOUR_USER&theme=dark" media="(prefers-color-scheme: dark)">
-  <img src="https://YOUR.vercel.app/api/stats?username=YOUR_USER&theme=light" alt="GitHub stats card" />
-</picture>
-```
-
-You can do the same for the other cards:
-
-- Languages:
-  - Dark: `https://YOUR.vercel.app/api/languages?username=YOUR_USER&theme=dark`
-  - Light: `https://YOUR.vercel.app/api/languages?username=YOUR_USER&theme=light`
-- Repos:
-  - Dark: `https://YOUR.vercel.app/api/repos?username=YOUR_USER&theme=dark&count=6&sort=stars`
-  - Light: `https://YOUR.vercel.app/api/repos?username=YOUR_USER&theme=light&count=6&sort=stars`
-- Streak (token required):
-  - Dark: `https://YOUR.vercel.app/api/streak?username=YOUR_USER&theme=dark`
-  - Light: `https://YOUR.vercel.app/api/streak?username=YOUR_USER&theme=light`
-
-## 🗂️ Repository Structure
-
-Complete tree (current workspace):
+### Recommended environment variables
 
 ```text
-.
-├── .github
-│   └── workflows
-│       ├── ci.yml
-│       └── pregenerate.yml
-├── .gitignore
-├── README.md
-├── README_bak.md
-├── api
-│   ├── health.ts
-│   ├── limits.ts
-│   ├── languages.ts
-│   ├── repos.ts
-│   ├── stats.ts
-│   └── streak.ts
-├── cards
-│   ├── error.ts
-│   ├── languages.ts
-│   ├── repos.ts
-│   ├── stats.ts
-│   ├── streak.ts
-│   └── svg.ts
-├── lib
-│   ├── cache-aside.ts
-│   ├── cache-entry.ts
-│   ├── cache.ts
-│   ├── config.ts
-│   ├── diag.ts
-│   ├── etag.ts
-│   ├── github.ts
-│   ├── http.ts
-│   ├── kv-rest.ts
-│   ├── limit.ts
-│   ├── query.ts
-│   ├── request.ts
-│   ├── response.ts
-│   └── streak.ts
-├── public
-│   └── cards
-│       └── .gitkeep
-├── scripts
-│   └── pregenerate.mjs
-├── package.json
-├── tsconfig.json
-└── vercel.json
+GITHUB_TOKEN
+GH_TOKEN
+CACHE_ENABLED=true
+KV_REST_API_URL
+KV_REST_API_TOKEN
+CACHE_TTL_STATS=21600
+CACHE_TTL_REPOS=21600
+CACHE_TTL_LANGUAGES=86400
+CACHE_TTL_STREAK=21600
 ```
 
-What each folder does:
+---
 
-- `api/`: Vercel serverless entrypoints (one file per endpoint). Each handler:
-  - Parses query params (`lib/query.ts`)
-  - Calls GitHub API helpers (`lib/github.ts`)
-  - Renders SVG via card renderers (`cards/*`)
-  - Returns either SVG or JSON depending on `format`
-- `cards/`: Pure render logic (string-based SVG composition).
-  - `cards/svg.ts` provides shared primitives like `cardFrame`, text, chips, bars, and XML escaping.
-- `lib/`: Shared utilities:
-  - `lib/github.ts`: GitHub REST + GraphQL fetch helpers (token-aware, helpful error messages)
-  - `lib/http.ts`: response headers + theme tokens
-  - `lib/query.ts`: robust parsing of `username`, `theme`, `format`, `count`
-  - `lib/streak.ts`: computes current/longest streak from GraphQL day counts
+## Static pregeneration mode
 
-## 🔗 Flow Chart (Mermaid)
+If you want minimal runtime cost for public README views, pre-generate SVGs and commit them into the repository.
 
-```mermaid
-flowchart TD
-  A[Request /api/*?username=...] --> B[api/*.ts handler]
-  B --> C[lib/query.ts parse params]
-  B --> D[lib/cache.ts + KV REST cache]
-  B --> E[lib/github.ts call GitHub API]
-  B --> F[cards/* render SVG]
-  B --> G[lib/response.ts set headers + ETag]
-  G --> H[Response: SVG or JSON]
+### Repository variables
+
+```text
+GH_STATS_BASE_URL
+GH_STATS_USERNAME
 ```
 
-## 🧠 Notes on Caching & Rate Limits
+### Workflow
 
-- SVG responses default to: `Cache-Control: public, s-maxage=21600, stale-while-revalidate=86400` (6h at CDN/edge).
-- JSON responses default to: `Cache-Control: public, s-maxage=3600, stale-while-revalidate=86400` (1h at CDN/edge).
-- All responses include `ETag` and support `If-None-Match` → `304 Not Modified`.
-- Server-side cache is cache-aside: cache hit returns immediately; miss computes + stores.
-- If you don’t set `GITHUB_TOKEN`, GitHub’s anonymous rate limit can be tight; `mode=primary` keeps `/api/languages` cheap.
+Use the pregeneration workflow to periodically refresh committed card assets and reference them directly from your profile README.
 
-## 🪵 Static mode (zero runtime usage)
+---
 
-If you want effectively **zero Vercel function usage** during README views, you can pre-generate SVGs nightly and commit them to the repo:
+## Project structure
 
-1) Set repo variables:
-   - `GH_STATS_BASE_URL` (your deployed service URL, e.g. `https://YOUR.vercel.app`)
-   - `GH_STATS_USERNAME` (your GitHub username)
-2) Enable the `Pregenerate Cards` workflow (`.github/workflows/pregenerate.yml`).
-3) Reference files under `/cards/*.svg` in your README (the project rewrites `/cards/*` → `public/cards/*`).
+```text
+.github/workflows/
+api/
+cards/
+lib/
+public/
+scripts/
+README.md
+package.json
+tsconfig.json
+vercel.json
+```
 
-## 🏠 Home page
+### Key folders
 
-This repo includes a simple marketing home page (static) at `/`:
+- `api/` — Vercel function entrypoints
+- `cards/` — SVG renderers and card composition logic
+- `lib/` — query parsing, GitHub API helpers, theme resolution, ranking, diagnostics, formatting, response helpers
+- `public/` — static marketing page and public assets
+- `scripts/` — pregeneration support
 
-- `public/index.html`
-- `public/site.css`
-- `public/site.js`
+---
 
-It renders a live preview of the cards and generates copy/paste embed snippets.
+## Recent enhancement direction
 
-## 🤝 Contributing
+The most recent work in the repository indicates a broader evolution beyond the initial four cards. The codebase now shows support or preparation for:
 
-PRs and tweaks are welcome. A lightweight workflow that matches this repo:
+- richer theme/token handling
+- custom color parameters
+- border and radius customization
+- advanced language-card layouts
+- pinned repository card renderer
+- gist card renderer
+- WakaTime-oriented renderer
+- extended health diagnostics coverage for newly introduced card categories
 
-1. Keep changes small and focused (one card/endpoint at a time).
-2. Prefer adding helpers to `lib/` if logic is shared across endpoints.
-3. If you add a new card, mirror the existing pattern:
-   - `cards/<name>.ts` renderer
-   - `api/<name>.ts` handler
+This makes the project more aligned with a self-hosted GitHub README card platform rather than a single-purpose stats endpoint set.
 
-## 📄 Documentation
+---
 
-There isn’t separate hosted documentation yet; the best “docs” are the code and the endpoints above:
+## Homepage
 
-- `api/*.ts` shows request/response behavior
-- `cards/*.ts` shows SVG layout and styling
-- `lib/github.ts` shows how GitHub API calls are made (token handling, error messages)
+The repository includes a simple static landing page at `/` that previews cards and generates embed snippets.
 
-## ❤️ Acknowledgements
+Key homepage goals:
 
-- GitHub REST & GraphQL APIs
-- Vercel serverless platform
+- explain the product quickly
+- let users preview cards against a chosen username
+- provide copy/paste embed snippets
+- expose health and rate-limit diagnostics
+- encourage self-hosting and low-cost usage patterns
 
-## 📝 Changelog
+---
 
-### Unreleased (working tree)
+## Security posture
 
-- Added server-side caching (KV REST / in-memory) + cache-aside policy
-- Added `ETag`/`If-None-Match` support for `304 Not Modified`
-- Reduced GitHub API calls via GraphQL batching (token-aware)
-- Reworked `/api/languages` to default to cheap `mode=primary` with optional `mode=bytes` (limited + cached)
-- Added marketing homepage at `/` with live previews and embed snippet generator
+- Minimal dependency footprint
+- TypeScript-based codebase
+- Cache-aware design to reduce upstream API pressure
+- Friendly fallback cards instead of hard failures in embeds
 
-### History (git)
+---
 
-- 2026-02-26 minor changes around the cards (`bc7c699`)
-- 2026-02-26 Adjust pre-generate build for once a week (`c4b1aea`)
-- 2026-02-26 Remove unwanted file; Add index.html page (`b6b14fc`)
-- 2026-02-23 vercel deploy CI added (`6131946`)
-- 2026-02-23 performance improvements; Lower hosting cost and rate-limits applied (`4a097c0`)
-- 2026-02-23 Package fix for successful deployment (`aef549f`)
-- 2026-02-23 Updates for ESM (`5f82912`)
-- 2026-02-23 Aligned TS config for NodeNext ESM; Updated all relrevant imports to include .js (`d4eaff9`)
-- 2026-02-23 Update for build failure (`d34e345`)
-- 2026-02-23 Init commit (`0e133c2`)
+## Acknowledgements
 
-## 🔒 Security posture
+- GitHub REST API
+- GitHub GraphQL API
+- Vercel
+- The broader GitHub profile README ecosystem, including inspiration from `anuraghazra/github-readme-stats`
 
-- Uses Node’s built-in `fetch` (no axios) to reduce dependency/advisory exposure.
-- Minimal dependencies: only `typescript` + `@types/node` as dev deps.
+---
 
-## 📄 License
+## License
 
-MIT — see `LICENSE`.
+MIT. See [`LICENSE`](LICENSE) for details.
