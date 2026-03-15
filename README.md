@@ -123,6 +123,7 @@ The hosted generator lets you preview cards and generate embed snippets from the
 Renders a GitHub profile stats card.
 
 **Purpose**
+
 - Repositories
 - Followers
 - Total stars
@@ -140,6 +141,7 @@ Renders a GitHub profile stats card.
 Renders a top repositories card for public repositories.
 
 **Options**
+
 - `count=1..10`
 - `sort=stars|forks|updated`
 
@@ -155,6 +157,7 @@ Renders a top repositories card for public repositories.
 Renders a top languages card.
 
 **Modes**
+
 - `mode=primary` — lower-cost default mode
 - `mode=bytes` — more accurate mode for language distribution
 
@@ -175,6 +178,45 @@ Renders a contribution streak card using GitHub GraphQL contribution data.
 ```text
 /api/streak?username=octocat&theme=dark
 /api/streak?username=octocat&format=json
+```
+
+### `/api/gist`
+
+Renders a gist related card using GitHub API.
+
+**Examples**
+
+```text
+/api/gist?id=aa5a315d61ae9438b18d
+/api/gist?id=aa5a315d61ae9438b18d&theme=tokyonight&show_icons=true
+/api/gist?id=aa5a315d61ae9438b18d&custom_title=Featured%20Gist&card_width=560
+/api/gist?id=aa5a315d61ae9438b18d&format=json
+```
+
+### `/api/wakatime`
+
+Renders a wakatime related card using Wakatime API.
+
+**Examples**
+
+```text
+/api/wakatime?username=octocat
+/api/wakatime?username=octocat&range=last_30_days
+/api/wakatime?username=octocat&layout=donut&theme=tokyonight
+/api/wakatime?username=octocat&format=json
+```
+
+### `/api/pin`
+
+Renders a pinned repository related card using GitHub API.
+
+**Examples**
+
+```text
+/api/pin?repo=SaumilP/gh-stats
+/api/pin?repo=SaumilP/gh-stats&theme=tokyonight&show_icons=true
+/api/pin?owner=SaumilP&name=gh-stats&show_owner=true&custom_title=Featured%20Repo
+/api/pin?repo=SaumilP/gh-stats&format=json
 ```
 
 ### `/api/health`
