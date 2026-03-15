@@ -1,6 +1,6 @@
 import type { Cache } from "./cache";
 
-type Endpoint = "stats" | "repos" | "languages" | "streak" | "health" | "limits";
+type Endpoint = "stats" | "repos" | "languages" | "streak" | "pin" | "gist" | "wakatime" | "health" | "limits";
 
 const KEY_PREFIX = "diag:last_success:";
 
@@ -24,4 +24,3 @@ export async function getLastSuccess(endpoint: Endpoint, cache: Cache | null): P
   }
   return mem().get(endpoint) || null;
 }
-

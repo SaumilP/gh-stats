@@ -1,23 +1,52 @@
-import type { Theme } from "../lib/query";
-import { cardFrame, cardFooter, textLine, muted, chip } from "./svg";
+import type { ThemeStyle } from "../lib/theme";
+import { cardFrame, cardFooter, textLine, muted } from "./svg";
+
+export type StatsItem = {
+  label: string;
+  value: string;
+  icon?: string;
+};
+
+export type StatsCardOptions = {
+  compact?: boolean;
+  hideTitle?: boolean;
+  customTitle?: string;
+  showIcons?: boolean;
+  lineHeight?: number;
+  cardWidth?: number;
+  textBold?: boolean;
+  disableAnimations?: boolean;
+};
 
 export function renderStats(
-  theme: Theme,
-  stats: { name: string; username: string; repos: number; followers: number; stars: number; forks: number },
-  opts: { compact?: boolean } = {},
+  style: ThemeStyle,
+  header: { name: string; username: string },
+  items: StatsItem[],
+  opts: StatsCardOptions = {},
 ) {
-  const W=480, H=opts.compact ? 170 : 190;
-  let svg = cardFrame(theme, W, H, `GitHub Stats: ${stats.username}`);
-  svg += textLine(theme, 18, 36, stats.name, 18, 800);
-  svg += muted(theme, 18, 56, `@${stats.username}`);
+  const W = Math.max(320, Math.min(900, Math.floor(opts.cardWidth || 480)));
+  const lineHeight = Math.max(16, Math.min(40, Math.floor(opts.lineHeight || (opts.compact ? 20 : 24))));
+  const title = opts.customTitle || "GitHub Stats";
+  const yTitle = 34;
+  const ySubtitle = 54;
+  const yStart = opts.hideTitle ? 38 : 72;
+  const rows = Math.max(1, items.length);
+  const H = yStart + rows * lineHeight + 20;
+  const weight = opts.textBold ? 700 : 600;
 
-  let x=18;
-  const c1=chip(theme,x,84,`📦 Repos: ${stats.repos}`); svg+=c1.svg; x+=c1.w+10;
-  const c2=chip(theme,x,84,`⭐ Stars: ${stats.stars}`); svg+=c2.svg; x+=c2.w+10;
-  const c3=chip(theme,x,84,`🍴 Forks: ${stats.forks}`); svg+=c3.svg;
+  let svg = cardFrame(style, W, H, `${title}: ${header.username}`, { disableAnimations: opts.disableAnimations });
+  if (!opts.hideTitle) {
+    svg += textLine(style, 18, yTitle, title, 16, 800, style.tokens.title);
+    svg += muted(style, 18, ySubtitle, `@${header.username}`, 12);
+  }
 
-  svg += chip(theme,18,116,`👥 Followers: ${stats.followers}`).svg;
-  svg += muted(theme, 18, H-20, "Cache: up to 6h (edge) • Powered by GitHub API");
+  items.forEach((item, idx) => {
+    const icon = opts.showIcons && item.icon ? `${item.icon} ` : "";
+    const y = yStart + idx * lineHeight;
+    const text = `${icon}${item.label}: ${item.value}`;
+    svg += textLine(style, 18, y, text, 13, weight);
+  });
+
   svg += cardFooter();
   return svg;
 }

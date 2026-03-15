@@ -1,5 +1,4 @@
 import { sha256Hex } from "./etag";
-import type { Theme } from "./query";
 
 export type Format = "svg" | "json";
 
@@ -47,11 +46,4 @@ export function sendJson(req: any, res: any, payload: unknown, cacheSeconds: num
   if (withEtag(req, res, body)) return;
   res.statusCode = res.statusCode || 200;
   res.end(body);
-}
-
-export function themeTokens(theme: Theme) {
-  if (theme === "light") {
-    return { bg:"#ffffff", fg:"#24292f", muted:"#57606a", border:"#d0d7de", chipBg:"#f6f8fa", accent:"#0969da" };
-  }
-  return { bg:"#0d1117", fg:"#e6edf3", muted:"#9da7b1", border:"#30363d", chipBg:"#161b22", accent:"#58a6ff" };
 }

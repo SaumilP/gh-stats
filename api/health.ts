@@ -69,6 +69,9 @@ export default async function handler(req: any, res: any) {
       repos: await getLastSuccess("repos", cache),
       languages: await getLastSuccess("languages", cache),
       streak: await getLastSuccess("streak", cache),
+      pin: await getLastSuccess("pin", cache),
+      gist: await getLastSuccess("gist", cache),
+      wakatime: await getLastSuccess("wakatime", cache),
     },
   };
 

@@ -141,3 +141,90 @@ export async function getRateLimit() {
   const resp = await ghFetch(`${GH_API}/rate_limit`);
   return (await resp.json()) as any;
 }
+
+export async function getRepo(owner: string, repo: string) {
+  const resp = await ghFetch(`${GH_API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`);
+  return (await resp.json()) as any;
+}
+
+export async function getGist(id: string) {
+  const resp = await ghFetch(`${GH_API}/gists/${encodeURIComponent(id)}`);
+  return (await resp.json()) as any;
+}
+
+export type UserStatsSummary = UserRepoSummary & {
+  contributions?: {
+    commits: number;
+    issues: number;
+    prs: number;
+    reviews: number;
+  };
+};
+
+const USER_STATS_QUERY = `
+query($login:String!, $repoLimit:Int!, $from:DateTime, $to:DateTime) {
+  user(login:$login) {
+    login
+    name
+    createdAt
+    followers { totalCount }
+    repositories(privacy:PUBLIC, first:$repoLimit, orderBy:{field:UPDATED_AT, direction:DESC}) {
+      totalCount
+      nodes {
+        name
+        description
+        stargazerCount
+        forkCount
+        isFork
+        isArchived
+        updatedAt
+        primaryLanguage { name }
+      }
+    }
+    contributionsCollection(from:$from, to:$to) {
+      totalCommitContributions
+      totalIssueContributions
+      totalPullRequestContributions
+      totalPullRequestReviewContributions
+    }
+  }
+}
+`;
+
+export async function getUserStatsSummary(
+  login: string,
+  repoLimit = 100,
+  from: string | null = null,
+  to: string | null = null,
+): Promise<UserStatsSummary> {
+  type Gql = {
+    user: {
+      login: string;
+      name?: string | null;
+      createdAt: string;
+      followers: { totalCount: number };
+      repositories: { totalCount: number; nodes: RepoNode[] };
+      contributionsCollection: {
+        totalCommitContributions: number;
+        totalIssueContributions: number;
+        totalPullRequestContributions: number;
+        totalPullRequestReviewContributions: number;
+      };
+    } | null;
+  };
+  const data = await graphQL<Gql>(USER_STATS_QUERY, { login, repoLimit: Math.max(1, Math.min(100, Math.floor(repoLimit))), from, to });
+  if (!data.user) throw new Error("GitHub user not found.");
+  return {
+    login: data.user.login,
+    name: data.user.name,
+    followers: data.user.followers.totalCount || 0,
+    publicRepos: data.user.repositories.totalCount || 0,
+    repos: data.user.repositories.nodes || [],
+    contributions: {
+      commits: Number(data.user.contributionsCollection?.totalCommitContributions || 0),
+      issues: Number(data.user.contributionsCollection?.totalIssueContributions || 0),
+      prs: Number(data.user.contributionsCollection?.totalPullRequestContributions || 0),
+      reviews: Number(data.user.contributionsCollection?.totalPullRequestReviewContributions || 0),
+    },
+  };
+}

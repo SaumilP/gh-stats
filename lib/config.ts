@@ -5,14 +5,17 @@ function envInt(name: string, def: number) {
   return Number.isFinite(n) ? n : def;
 }
 
-export function ttlSecondsFor(endpoint: "stats" | "repos" | "langs" | "streak") {
+export function ttlSecondsFor(endpoint: "stats" | "repos" | "langs" | "streak" | "pin" | "gist" | "wakatime") {
   if (endpoint === "langs") return envInt("CACHE_TTL_LANGUAGES", 86400);
   if (endpoint === "repos") return envInt("CACHE_TTL_REPOS", 21600);
   if (endpoint === "streak") return envInt("CACHE_TTL_STREAK", 21600);
+  if (endpoint === "pin") return envInt("CACHE_TTL_PIN", 21600);
+  if (endpoint === "gist") return envInt("CACHE_TTL_GIST", 21600);
+  if (endpoint === "wakatime") return envInt("CACHE_TTL_WAKATIME", 21600);
   return envInt("CACHE_TTL_STATS", 21600);
 }
 
-export function staleExtraSecondsFor(endpoint: "stats" | "repos" | "langs" | "streak") {
+export function staleExtraSecondsFor(endpoint: "stats" | "repos" | "langs" | "streak" | "pin" | "gist" | "wakatime") {
   // Keep stale entries around to enable soft-TTL checks without recomputing.
   if (endpoint === "langs") return 7 * 86400;
   return 2 * 86400;
@@ -21,4 +24,3 @@ export function staleExtraSecondsFor(endpoint: "stats" | "repos" | "langs" | "st
 export function hasGithubToken() {
   return Boolean(process.env.GITHUB_TOKEN || process.env.GH_TOKEN);
 }
-

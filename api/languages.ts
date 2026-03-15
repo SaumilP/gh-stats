@@ -1,4 +1,4 @@
-import { qBool, qCacheSeconds, qCompact, qFormat, qInt, qString, qTheme } from "../lib/query";
+import { qBool, qCacheSeconds, qCompact, qFormat, qFloat, qInt, qString, qStringList, qThemeOptions } from "../lib/query";
 import { getCache } from "../lib/cache";
 import { cacheGet, cacheSet } from "../lib/cache-aside";
 import { staleExtraSecondsFor, ttlSecondsFor } from "../lib/config";
@@ -6,20 +6,53 @@ import { getLatestRepoUpdatedAt, getRepoLanguages, getUserRepoSummary, githubTok
 import { pLimit } from "../lib/limit";
 import { requestIdFrom } from "../lib/request";
 import { sendJson, sendSvg } from "../lib/response";
-import { renderLanguages } from "../cards/languages";
+import { renderLanguages, type LanguageItem } from "../cards/languages";
 import { renderErrorCard } from "../cards/error";
 import { recordLastSuccess } from "../lib/diag";
 import { withCacheKeyVersion } from "../lib/cache-key";
+import { resolveTheme, styleKeyFrom } from "../lib/theme";
+import { formatBytes, formatPercent } from "../lib/format";
+
+function normalizeList(list: string[]) {
+  return new Set(list.map((s) => s.trim().toLowerCase()).filter(Boolean));
+}
 
 export default async function handler(req: any, res: any) {
   const requestId = requestIdFrom(req);
   const username = qString(req.query, "username");
-  const theme = qTheme(req.query);
   const format = qFormat(req.query);
-  const compact = qCompact(req.query);
+  const compactParam = qCompact(req.query);
   const refresh = qBool(req.query, "refresh", false);
   const modeRaw = (qString(req.query, "mode", "primary") || "primary").toLowerCase();
   const maxReposForLanguages = qInt(req.query, "maxReposForLanguages", 30, 5, 50);
+
+  const themeOpts = qThemeOptions(req.query);
+  const style = resolveTheme(themeOpts);
+
+  const layoutRaw = (qString(req.query, "layout", compactParam ? "compact" : "normal") || "normal").toLowerCase();
+  const layout = (layoutRaw === "compact" || layoutRaw === "donut" || layoutRaw === "donut-vertical" || layoutRaw === "pie")
+    ? (layoutRaw as "compact" | "donut" | "donut-vertical" | "pie")
+    : "normal";
+  const compact = layout === "compact" || compactParam;
+  const hideProgress = qBool(req.query, "hide_progress", false);
+  const hideTitle = qBool(req.query, "hide_title", false);
+  const customTitle = qString(req.query, "custom_title") || undefined;
+  const lineHeight = qInt(req.query, "line_height", compact ? 20 : 22, 16, 40);
+  const cardWidth = qInt(req.query, "card_width", 480, 320, 900);
+  const textBold = qBool(req.query, "text_bold", false);
+  const disableAnimations = qBool(req.query, "disable_animations", false);
+
+  const sizeWeight = qFloat(req.query, "size_weight", 1, 0, 2);
+  const countWeight = qFloat(req.query, "count_weight", 0, 0, 2);
+  const statsFormatRaw = (qString(req.query, "stats_format", "percentages") || "percentages").toLowerCase();
+  const statsFormat = statsFormatRaw === "bytes" ? "bytes" : "percentages";
+  const langsCount = qInt(req.query, "langs_count", 5, 1, 20);
+
+  const locale = qString(req.query, "locale", "en") || "en";
+  const numberPrecision = qInt(req.query, "number_precision", 1, 0, 3);
+
+  const hideLangs = normalizeList(qStringList(req.query, "hide"));
+  const excludeRepos = normalizeList(qStringList(req.query, "exclude_repo"));
 
   const mode = (modeRaw === "bytes" ? "bytes" : "primary") as "primary" | "bytes";
   const cdnCacheSeconds = qCacheSeconds(req.query, format === "svg" ? (mode === "bytes" ? 86400 : 21600) : 3600);
@@ -33,14 +66,39 @@ export default async function handler(req: any, res: any) {
       return;
     }
     res.statusCode = 200;
-    sendSvg(req, res, renderErrorCard(theme, { endpoint: "languages", requestId, title: "Missing username", hint: "Add ?username=octocat", compact }), 60);
+    sendSvg(req, res, renderErrorCard(style, { endpoint: "languages", requestId, title: "Missing username", hint: "Add ?username=octocat", compact }), 60);
     return;
   }
 
   try {
     const effectiveMode: "primary" | "bytes" = (mode === "bytes" && !githubTokenPresent()) ? "primary" : mode;
     const cacheModeKey = effectiveMode;
-    const key = withCacheKeyVersion(`langs:${username}:${theme}:${format}:${compact ? 1 : 0}:${cacheModeKey}:${maxReposForLanguages}`);
+    const key = withCacheKeyVersion([
+      "langs",
+      username,
+      styleKeyFrom(themeOpts),
+      format,
+      compact ? "1" : "0",
+      layout,
+      hideProgress ? "1" : "0",
+      hideTitle ? "1" : "0",
+      customTitle || "",
+      lineHeight,
+      cardWidth,
+      textBold ? "1" : "0",
+      disableAnimations ? "1" : "0",
+      sizeWeight,
+      countWeight,
+      statsFormat,
+      langsCount,
+      cacheModeKey,
+      maxReposForLanguages,
+      Array.from(hideLangs).sort().join(","),
+      Array.from(excludeRepos).sort().join(","),
+      locale,
+      numberPrecision,
+    ].join(":"));
+
     const cache = getCache();
 
     if (cache && !refresh) {
@@ -52,7 +110,6 @@ export default async function handler(req: any, res: any) {
           return;
         }
 
-        // Soft TTL for expensive bytes mode: if latest repo update hasn't changed, keep serving cached.
         if (effectiveMode === "bytes") {
           const cachedLatest = String(hit.entry.meta?.latestRepoUpdatedAt || "");
           if (cachedLatest) {
@@ -68,7 +125,7 @@ export default async function handler(req: any, res: any) {
       }
     }
 
-    const totals = new Map<string, number>();
+    const totals = new Map<string, { bytes: number; repos: number }>();
     let subtitle = "";
     let footer = "";
 
@@ -76,21 +133,33 @@ export default async function handler(req: any, res: any) {
       subtitle = `@${username} • primary language • weighted by stars`;
       if (githubTokenPresent()) {
         const summary = await getUserRepoSummary(username, maxReposForLanguages);
-        const repos = (summary.repos || []).filter(r => !r.isFork && !r.isArchived).slice(0, maxReposForLanguages);
+        const repos = (summary.repos || [])
+          .filter(r => !r.isFork && !r.isArchived)
+          .filter(r => !excludeRepos.has(String(r.name || "").toLowerCase()))
+          .slice(0, maxReposForLanguages);
         for (const r of repos) {
           const lang = r.primaryLanguage?.name;
           if (!lang) continue;
+          const key = lang.toLowerCase();
+          if (hideLangs.has(key)) continue;
           const w = Math.max(1, Number(r.stargazerCount) || 0);
-          totals.set(lang, (totals.get(lang) || 0) + w);
+          const curr = totals.get(lang) || { bytes: 0, repos: 0 };
+          totals.set(lang, { bytes: curr.bytes + w, repos: curr.repos + 1 });
         }
       } else {
         const repos = await listRepos(username);
-        const arr = (Array.isArray(repos) ? repos : []).filter((r:any)=> !r.fork && !r.archived).slice(0, maxReposForLanguages);
+        const arr = (Array.isArray(repos) ? repos : [])
+          .filter((r: any) => !r.fork && !r.archived)
+          .filter((r: any) => !excludeRepos.has(String(r.name || "").toLowerCase()))
+          .slice(0, maxReposForLanguages);
         for (const r of arr) {
           const lang = r.language;
           if (typeof lang !== "string" || !lang) continue;
+          const key = lang.toLowerCase();
+          if (hideLangs.has(key)) continue;
           const w = Math.max(1, Number(r.stargazers_count) || 0);
-          totals.set(lang, (totals.get(lang) || 0) + w);
+          const curr = totals.get(lang) || { bytes: 0, repos: 0 };
+          totals.set(lang, { bytes: curr.bytes + w, repos: curr.repos + 1 });
         }
       }
     } else {
@@ -104,16 +173,17 @@ export default async function handler(req: any, res: any) {
         const summary = await getUserRepoSummary(username, repoLimit);
         reposForBytes = (summary.repos || [])
           .filter(r => !r.isFork && !r.isArchived)
+          .filter(r => !excludeRepos.has(String(r.name || "").toLowerCase()))
           .map(r => ({ name: r.name, stars: Number(r.stargazerCount) || 0, forks: Number(r.forkCount) || 0, updatedAt: r.updatedAt }))
-          .sort((a,b)=> (b.stars - a.stars) || a.name.localeCompare(b.name))
+          .sort((a, b) => (b.stars - a.stars) || a.name.localeCompare(b.name))
           .slice(0, 10);
       } else {
-        // Shouldn't happen because bytes mode without token falls back to primary.
         const repos = await listRepos(username);
         reposForBytes = (Array.isArray(repos) ? repos : [])
-          .filter((r:any)=> !r.fork && !r.archived)
-          .map((r:any)=> ({ name: r.name, stars: Number(r.stargazers_count)||0, forks: Number(r.forks_count)||0, updated_at: r.updated_at }))
-          .sort((a,b)=> (b.stars - a.stars) || a.name.localeCompare(b.name))
+          .filter((r: any) => !r.fork && !r.archived)
+          .filter((r: any) => !excludeRepos.has(String(r.name || "").toLowerCase()))
+          .map((r: any) => ({ name: r.name, stars: Number(r.stargazers_count) || 0, forks: Number(r.forks_count) || 0, updated_at: r.updated_at }))
+          .sort((a, b) => (b.stars - a.stars) || a.name.localeCompare(b.name))
           .slice(0, 10);
       }
 
@@ -122,23 +192,56 @@ export default async function handler(req: any, res: any) {
         reposForBytes.map(r =>
           limit(async () => {
             const langs = await getRepoLanguages(username, r.name);
-            return langs;
+            return { name: r.name, langs: langs || {} };
           }),
         ),
       );
-      for (const langs of results) {
-        for (const [k, v] of Object.entries(langs || {})) {
-          totals.set(k, (totals.get(k) || 0) + (Number(v) || 0));
+
+      for (const repo of results) {
+        const seen = new Set<string>();
+        for (const [k, v] of Object.entries(repo.langs || {})) {
+          const key = String(k).toLowerCase();
+          if (hideLangs.has(key)) continue;
+          const curr = totals.get(k) || { bytes: 0, repos: 0 };
+          const bytes = Number(v) || 0;
+          totals.set(k, { bytes: curr.bytes + bytes, repos: curr.repos + (seen.has(key) ? 0 : 1) });
+          seen.add(key);
         }
       }
     }
 
-    const out = [...totals.entries()]
-      .map(([name, value]) => ({ name, value: Math.max(0, Number(value) || 0) }))
-      .sort((a, b) => (b.value - a.value) || a.name.localeCompare(b.name));
+    const computed = [...totals.entries()]
+      .map(([name, value]) => {
+        const bytes = Math.max(0, Number(value.bytes) || 0);
+        const repos = Math.max(0, Number(value.repos) || 0);
+        const score = (bytes ** sizeWeight) * (repos ** countWeight || 1);
+        return { name, bytes, repos, score };
+      })
+      .filter((l) => l.score > 0 || l.bytes > 0)
+      .sort((a, b) => (b.score - a.score) || a.name.localeCompare(b.name))
+      .slice(0, langsCount);
+
+    const totalScore = computed.reduce((a, l) => a + (l.score || 0), 0) || 1;
+
+    const out: LanguageItem[] = computed.map((l) => {
+      const ratio = Math.max(0, Math.min(1, (l.score || 0) / totalScore));
+      const valueLabel = statsFormat === "bytes" ? formatBytes(l.bytes, locale) : formatPercent(l.score, totalScore, numberPrecision);
+      const label = `${l.name} (${valueLabel})`;
+      return { name: l.name, ratio, label };
+    });
 
     if (format === "json") {
-      const payload = { username, mode: effectiveMode, maxReposForLanguages, languages: out };
+      const payload = {
+        username,
+        mode: effectiveMode,
+        maxReposForLanguages,
+        layout,
+        langsCount,
+        sizeWeight,
+        countWeight,
+        statsFormat,
+        languages: computed,
+      };
       const body = JSON.stringify(payload);
       if (cache) {
         const latest = effectiveMode === "bytes" ? (await getLatestRepoUpdatedAt(username).catch(() => null)) : null;
@@ -149,10 +252,18 @@ export default async function handler(req: any, res: any) {
       return;
     }
 
-    const svg = renderLanguages(theme, username, out, {
+    const svg = renderLanguages(style, username, out, {
       compact,
+      layout: layout === "normal" ? "normal" : layout,
       subtitle,
       footer: (mode === "bytes" && !githubTokenPresent()) ? "mode=bytes needs GITHUB_TOKEN; served primary mode instead" : footer,
+      hideProgress,
+      hideTitle,
+      customTitle,
+      lineHeight,
+      cardWidth,
+      textBold,
+      disableAnimations,
     });
     if (cache) {
       const latest = effectiveMode === "bytes" ? (await getLatestRepoUpdatedAt(username).catch(() => null)) : null;
@@ -160,7 +271,7 @@ export default async function handler(req: any, res: any) {
     }
     await recordLastSuccess("languages", cache);
     sendSvg(req, res, svg, cdnCacheSeconds);
-  } catch (e:any) {
+  } catch (e: any) {
     const detail = String(e?.message || e);
     if (format === "json") {
       res.statusCode = 502;
@@ -168,6 +279,6 @@ export default async function handler(req: any, res: any) {
       return;
     }
     res.statusCode = 200;
-    sendSvg(req, res, renderErrorCard(theme, { endpoint: "languages", username, requestId, title: "Failed to generate languages card", hint: "Try mode=primary or set GITHUB_TOKEN", detail, compact }), 60);
+    sendSvg(req, res, renderErrorCard(style, { endpoint: "languages", username, requestId, title: "Failed to generate languages card", hint: "Try mode=primary or set GITHUB_TOKEN", detail, compact }), 60);
   }
 }

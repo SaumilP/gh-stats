@@ -1,4 +1,4 @@
-import { qBool, qCacheSeconds, qCompact, qFormat, qInt, qString, qTheme } from "../lib/query";
+import { qBool, qCacheSeconds, qCompact, qFormat, qInt, qString, qThemeOptions } from "../lib/query";
 import { getCache } from "../lib/cache";
 import { cacheGet, cacheSet } from "../lib/cache-aside";
 import { staleExtraSecondsFor, ttlSecondsFor } from "../lib/config";
@@ -9,33 +9,45 @@ import { renderRepos } from "../cards/repos";
 import { renderErrorCard } from "../cards/error";
 import { recordLastSuccess } from "../lib/diag";
 import { withCacheKeyVersion } from "../lib/cache-key";
+import { resolveTheme, styleKeyFrom } from "../lib/theme";
 
 function sortRepos(repos: any[], sort: string) {
   const s = (sort || "stars").toLowerCase();
   const byName = (a: any, b: any) => String(a?.name || "").localeCompare(String(b?.name || ""));
-  if (s === "updated") return repos.sort((a,b)=> {
+  if (s === "updated") return repos.sort((a, b) => {
     const d = new Date(b.updated_at || 0).getTime() - new Date(a.updated_at || 0).getTime();
-    return d !== 0 ? d : byName(a,b);
+    return d !== 0 ? d : byName(a, b);
   });
-  if (s === "forks") return repos.sort((a,b)=> {
-    const d = (Number(b.forks_count)||0) - (Number(a.forks_count)||0);
-    return d !== 0 ? d : byName(a,b);
+  if (s === "forks") return repos.sort((a, b) => {
+    const d = (Number(b.forks_count) || 0) - (Number(a.forks_count) || 0);
+    return d !== 0 ? d : byName(a, b);
   });
-  return repos.sort((a,b)=> {
-    const d = (Number(b.stargazers_count)||0) - (Number(a.stargazers_count)||0);
-    return d !== 0 ? d : byName(a,b);
+  return repos.sort((a, b) => {
+    const d = (Number(b.stargazers_count) || 0) - (Number(a.stargazers_count) || 0);
+    return d !== 0 ? d : byName(a, b);
   });
 }
 
 export default async function handler(req: any, res: any) {
   const requestId = requestIdFrom(req);
   const username = qString(req.query, "username");
-  const theme = qTheme(req.query);
   const format = qFormat(req.query);
   const compact = qCompact(req.query);
   const refresh = qBool(req.query, "refresh", false);
   const count = qInt(req.query, "count", 6, 1, 10);
   const sort = qString(req.query, "sort", "stars") || "stars";
+
+  const themeOpts = qThemeOptions(req.query);
+  const style = resolveTheme(themeOpts);
+
+  const showIcons = qBool(req.query, "show_icons", false);
+  const hideTitle = qBool(req.query, "hide_title", false);
+  const customTitle = qString(req.query, "custom_title") || undefined;
+  const lineHeight = qInt(req.query, "line_height", compact ? 20 : 22, 16, 40);
+  const cardWidth = qInt(req.query, "card_width", compact ? 560 : 720, 320, 900);
+  const textBold = qBool(req.query, "text_bold", false);
+  const showOwner = qBool(req.query, "show_owner", false);
+  const disableAnimations = qBool(req.query, "disable_animations", false);
 
   const cdnCacheSeconds = qCacheSeconds(req.query, format === "svg" ? 21600 : 3600);
   const ttl = Math.min(ttlSecondsFor("repos"), cdnCacheSeconds);
@@ -47,12 +59,29 @@ export default async function handler(req: any, res: any) {
       return;
     }
     res.statusCode = 200;
-    sendSvg(req, res, renderErrorCard(theme, { endpoint: "repos", requestId, title: "Missing username", hint: "Add ?username=octocat", compact }), 60);
+    sendSvg(req, res, renderErrorCard(style, { endpoint: "repos", requestId, title: "Missing username", hint: "Add ?username=octocat", compact }), 60);
     return;
   }
 
   try {
-    const key = withCacheKeyVersion(`repos:${username}:${theme}:${format}:${compact ? 1 : 0}:${count}:${sort}`);
+    const key = withCacheKeyVersion([
+      "repos",
+      username,
+      styleKeyFrom(themeOpts),
+      format,
+      compact ? "1" : "0",
+      count,
+      sort,
+      showIcons ? "1" : "0",
+      hideTitle ? "1" : "0",
+      customTitle || "",
+      lineHeight,
+      cardWidth,
+      textBold ? "1" : "0",
+      showOwner ? "1" : "0",
+      disableAnimations ? "1" : "0",
+    ].join(":"));
+
     const cache = getCache();
     if (cache && !refresh) {
       const hit = await cacheGet(cache, key);
@@ -92,9 +121,9 @@ export default async function handler(req: any, res: any) {
     } else {
       const repos = await listRepos(username);
       const arr = Array.isArray(repos) ? repos : [];
-      const filtered = arr.filter((r:any)=> !r.fork && !r.archived);
+      const filtered = arr.filter((r: any) => !r.fork && !r.archived);
       const ordered = sortRepos(filtered, sort).slice(0, count);
-      out = ordered.map((r:any)=> ({ name: r.name, stars: Number(r.stargazers_count) || 0, forks: Number(r.forks_count) || 0, desc: r.description || "" }));
+      out = ordered.map((r: any) => ({ name: r.name, stars: Number(r.stargazers_count) || 0, forks: Number(r.forks_count) || 0, desc: r.description || "" }));
     }
 
     if (format === "json") {
@@ -106,11 +135,11 @@ export default async function handler(req: any, res: any) {
       return;
     }
 
-    const svg = renderRepos(theme, username, out, { compact });
+    const svg = renderRepos(style, username, out, { compact, hideTitle, customTitle, lineHeight, cardWidth, showIcons, textBold, showOwner, disableAnimations });
     if (cache) await cacheSet(cache, key, svg, ttl, staleExtraSecondsFor("repos"));
     await recordLastSuccess("repos", cache);
     sendSvg(req, res, svg, cdnCacheSeconds);
-  } catch (e:any) {
+  } catch (e: any) {
     const detail = String(e?.message || e);
     if (format === "json") {
       res.statusCode = 502;
@@ -118,6 +147,6 @@ export default async function handler(req: any, res: any) {
       return;
     }
     res.statusCode = 200;
-    sendSvg(req, res, renderErrorCard(theme, { endpoint: "repos", username, requestId, title: "Failed to generate repos card", hint: "Try again later or set GITHUB_TOKEN", detail, compact }), 60);
+    sendSvg(req, res, renderErrorCard(style, { endpoint: "repos", username, requestId, title: "Failed to generate repos card", hint: "Try again later or set GITHUB_TOKEN", detail, compact }), 60);
   }
 }
