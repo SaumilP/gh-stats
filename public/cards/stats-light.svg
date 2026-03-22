@@ -1,27 +1,14 @@
 
-<svg xmlns="http://www.w3.org/2000/svg" width="480" height="170" role="img" aria-label="GitHub Stats: SaumilP">
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="192" role="img" aria-label="GitHub Stats: SaumilP">
   <defs>
     <style>
+      
       @keyframes ghstatsGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
       .ghstats-bar-fill { transform-box: fill-box; transform-origin: left center; animation: ghstatsGrow 900ms cubic-bezier(.2,.8,.2,1) both; }
       @media (prefers-reduced-motion: reduce) { .ghstats-bar-fill { animation: none; } }
+    
     </style>
+    
   </defs>
-  <rect x="0.5" y="0.5" width="479" height="169" rx="14" fill="#ffffff" stroke="#d0d7de" />
-<text x="18" y="36" fill="#24292f" font-size="18" font-weight="800" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">SaumilP</text><text x="18" y="56" fill="#57606a" font-size="12" font-weight="400" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">@SaumilP</text>
-<g>
-  <rect x="18" y="68" width="102.4" height="22" rx="10" fill="#f6f8fa" stroke="#d0d7de" />
-  <text x="26" y="84" fill="#24292f" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">📦 Repos: 66</text>
-</g>
-<g>
-  <rect x="130.4" y="68" width="95.2" height="22" rx="10" fill="#f6f8fa" stroke="#d0d7de" />
-  <text x="138.4" y="84" fill="#24292f" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">⭐ Stars: 38</text>
-</g>
-<g>
-  <rect x="235.60000000000002" y="68" width="95.2" height="22" rx="10" fill="#f6f8fa" stroke="#d0d7de" />
-  <text x="243.60000000000002" y="84" fill="#24292f" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">🍴 Forks: 2</text>
-</g>
-<g>
-  <rect x="18" y="100" width="131.2" height="22" rx="10" fill="#f6f8fa" stroke="#d0d7de" />
-  <text x="26" y="116" fill="#24292f" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">👥 Followers: 33</text>
-</g><text x="18" y="150" fill="#57606a" font-size="12" font-weight="400" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">Cache: up to 6h (edge) • Powered by GitHub API</text></svg>
+  <rect x="0.5" y="0.5" width="479" height="191" rx="14" fill="#ffffff" stroke="#d0d7de" stroke-width="1" />
+<text x="18" y="34" fill="#0969da" font-size="16" font-weight="800" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">GitHub Stats</text><text x="18" y="54" fill="#57606a" font-size="12" font-weight="400" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">@SaumilP</text><text x="18" y="72" fill="#24292f" font-size="13" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">Total Repos: 66</text><text x="18" y="92" fill="#24292f" font-size="13" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">Total Stars: 38</text><text x="18" y="112" fill="#24292f" font-size="13" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">Total Forks: 2</text><text x="18" y="132" fill="#24292f" font-size="13" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">Followers: 33</text><text x="18" y="152" fill="#24292f" font-size="13" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">Rank: C</text></svg>
