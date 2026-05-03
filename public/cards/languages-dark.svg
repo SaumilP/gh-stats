@@ -14,26 +14,26 @@
 <text x="18" y="34" fill="#58a6ff" font-size="16" font-weight="800" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">Top Languages</text><text x="18" y="54" fill="#9da7b1" font-size="12" font-weight="400" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">@SaumilP • primary language • weighted by stars</text>
 <g>
   <rect x="18" y="86" width="444" height="7" rx="6" fill="#161b22" stroke="#30363d" />
-  <rect class="ghstats-bar-fill" x="18" y="86" width="185" height="7" rx="6" fill="#58a6ff" opacity="0.85" />
-  <text x="18" y="81" fill="#9da7b1" font-size="10" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">Python (41.7%)</text>
+  <rect class="ghstats-bar-fill" x="18" y="86" width="177.60000000000002" height="7" rx="6" fill="#58a6ff" opacity="0.85" />
+  <text x="18" y="81" fill="#9da7b1" font-size="10" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">Python (40.0%)</text>
 </g>
 <g>
   <rect x="18" y="106" width="444" height="7" rx="6" fill="#161b22" stroke="#30363d" />
-  <rect class="ghstats-bar-fill" x="18" y="106" width="111" height="7" rx="6" fill="#58a6ff" opacity="0.85" />
-  <text x="18" y="101" fill="#9da7b1" font-size="10" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">Java (25.0%)</text>
+  <rect class="ghstats-bar-fill" x="18" y="106" width="106.56" height="7" rx="6" fill="#58a6ff" opacity="0.85" />
+  <text x="18" y="101" fill="#9da7b1" font-size="10" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">Java (24.0%)</text>
 </g>
 <g>
   <rect x="18" y="126" width="444" height="7" rx="6" fill="#161b22" stroke="#30363d" />
-  <rect class="ghstats-bar-fill" x="18" y="126" width="92.5" height="7" rx="6" fill="#58a6ff" opacity="0.85" />
-  <text x="18" y="121" fill="#9da7b1" font-size="10" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">Rust (20.8%)</text>
+  <rect class="ghstats-bar-fill" x="18" y="126" width="106.56" height="7" rx="6" fill="#58a6ff" opacity="0.85" />
+  <text x="18" y="121" fill="#9da7b1" font-size="10" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">Rust (24.0%)</text>
 </g>
 <g>
   <rect x="18" y="146" width="444" height="7" rx="6" fill="#161b22" stroke="#30363d" />
-  <rect class="ghstats-bar-fill" x="18" y="146" width="37" height="7" rx="6" fill="#58a6ff" opacity="0.85" />
-  <text x="18" y="141" fill="#9da7b1" font-size="10" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">TypeScript (8.3%)</text>
+  <rect class="ghstats-bar-fill" x="18" y="146" width="35.52" height="7" rx="6" fill="#58a6ff" opacity="0.85" />
+  <text x="18" y="141" fill="#9da7b1" font-size="10" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">TypeScript (8.0%)</text>
 </g>
 <g>
   <rect x="18" y="166" width="444" height="7" rx="6" fill="#161b22" stroke="#30363d" />
-  <rect class="ghstats-bar-fill" x="18" y="166" width="18.5" height="7" rx="6" fill="#58a6ff" opacity="0.85" />
-  <text x="18" y="161" fill="#9da7b1" font-size="10" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">JavaScript (4.2%)</text>
+  <rect class="ghstats-bar-fill" x="18" y="166" width="17.76" height="7" rx="6" fill="#58a6ff" opacity="0.85" />
+  <text x="18" y="161" fill="#9da7b1" font-size="10" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial">JavaScript (4.0%)</text>
 </g></svg>
