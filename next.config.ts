@@ -8,7 +8,6 @@ const nextConfig: NextConfig = {
     imageSizes: [120, 240, 360],
   },
   compress: true,
-  swcMinify: true,
   poweredByHeader: false,
 };
 

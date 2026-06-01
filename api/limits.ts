@@ -4,6 +4,7 @@ import { getRateLimit, githubTokenPresent } from "../lib/github";
 import { qCacheSeconds } from "../lib/query";
 import { requestIdFrom } from "../lib/request";
 import { sendJson } from "../lib/response";
+import { recordLastSuccess } from "../lib/diag";
 
 export default async function handler(req: any, res: any) {
   const requestId = requestIdFrom(req);
@@ -20,6 +21,7 @@ export default async function handler(req: any, res: any) {
     const cached = cache ? await cache.get(key) : null;
     const rate = cached ? JSON.parse(cached) : await getRateLimit();
     if (!cached && cache) await cache.set(key, JSON.stringify(rate), 60);
+    await recordLastSuccess("limits", cache);
     sendJson(req, res, { ok: true, tokenPresent: true, rateLimit: rate, requestId }, cdnCacheSeconds);
   } catch (e: any) {
     res.statusCode = 502;

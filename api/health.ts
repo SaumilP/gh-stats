@@ -72,6 +72,9 @@ export default async function handler(req: any, res: any) {
       pin: await getLastSuccess("pin", cache),
       gist: await getLastSuccess("gist", cache),
       wakatime: await getLastSuccess("wakatime", cache),
+      focus: await getLastSuccess("focus", cache),
+      impact: await getLastSuccess("impact", cache),
+      limits: await getLastSuccess("limits", cache),
     },
   };
 
