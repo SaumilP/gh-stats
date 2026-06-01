@@ -41,8 +41,7 @@
   ],
   "functions": {
     "api/**": {
-      "maxDuration": 30,
-      "memory": 1024
+      "maxDuration": 30
     }
   }
 }
