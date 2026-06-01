@@ -18,13 +18,14 @@ export function buildCardUrl(
 export function getCardUrls(
   username: string,
   theme: Theme,
-  domain: string = "https://gh-stats.com/api"
+  domain?: string
 ) {
+  const baseUrl = domain || (typeof window !== 'undefined' ? `${window.location.origin}/api` : '/api');
   return {
-    stats: buildCardUrl(`${domain}/stats`, username, theme),
-    languages: buildCardUrl(`${domain}/languages`, username, theme),
-    repos: buildCardUrl(`${domain}/repos`, username, theme),
-    streak: buildCardUrl(`${domain}/streak`, username, theme),
+    stats: buildCardUrl(`${baseUrl}/stats`, username, theme),
+    languages: buildCardUrl(`${baseUrl}/languages`, username, theme),
+    repos: buildCardUrl(`${baseUrl}/repos`, username, theme),
+    streak: buildCardUrl(`${baseUrl}/streak`, username, theme),
   };
 }
 
