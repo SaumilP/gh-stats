@@ -146,20 +146,30 @@ export function Hero({ onPreviewUpdate }: HeroProps) {
               className="flex flex-col xs:flex-row gap-3"
               variants={itemVariants}
             >
-              <Button
-                variant="primary"
-                size="md"
+              <a
+                href="#preview"
                 className="flex-1"
               >
-                Get Started
-              </Button>
-              <Button
-                variant="ghost"
-                size="md"
+                <Button
+                  variant="primary"
+                  size="md"
+                  className="w-full"
+                >
+                  Get Started
+                </Button>
+              </a>
+              <a
+                href="/docs"
                 className="flex-1"
               >
-                View Docs
-              </Button>
+                <Button
+                  variant="ghost"
+                  size="md"
+                  className="w-full"
+                >
+                  View Docs
+                </Button>
+              </a>
             </motion.div>
 
             {/* Fine Print */}
