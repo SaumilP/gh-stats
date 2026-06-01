@@ -3,8 +3,10 @@ import { join } from "node:path";
 
 const baseUrl = process.env.GH_STATS_BASE_URL || process.env.BASE_URL;
 const username = process.env.GH_STATS_USERNAME || process.env.USERNAME;
+const repo = process.env.GH_REPOSITORY_NAME || process.env.REPO_NAME;
+const gistid = process.env.GIST_ID || process.env.GIST_ID;
 
-if (!baseUrl || !username) {
+if (!baseUrl || !username || repo || gistid) {
   console.error("Missing GH_STATS_BASE_URL and/or GH_STATS_USERNAME env vars.");
   process.exit(2);
 }
@@ -32,6 +34,14 @@ const endpoints = [
   {
     name: "streak",
     path: ({ username, theme }) => `/api/streak?username=${username}&theme=${theme}&`,
+  },
+  {
+    name: "pin",
+    path: ({ username, theme, repo }) => `/api/pin?repo=${username}/${repo}&theme=${theme}&show_icons=true`,
+  },
+  {
+    name: "gist",
+    path: ({ gistid, theme }) => `/api/gist?id=${gistid}&theme=${theme}&show_icons=true`,
   },
 ];
 

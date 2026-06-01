@@ -12,7 +12,7 @@
 <p align="center">
   <a href="https://github.com/SaumilP/gh-stats">Repository</a>
   ·
-  <a href="https://gh-stats-gen.vercel.app/">Live Demo</a>
+  <a href="https://gh-stats-plum-five.vercel.app/">Live Demo</a>
   ·
   <a href="#features">Features</a>
   ·
@@ -110,9 +110,9 @@ The latest repository changes also introduce broader card foundations and presen
 
 The hosted generator lets you preview cards and generate embed snippets from the browser:
 
-- Live app: `https://gh-stats-gen.vercel.app/`
-- Health check: `https://gh-stats-gen.vercel.app/api/health`
-- Limits: `https://gh-stats-gen.vercel.app/api/limits?format=json`
+- Live app: `https://gh-stats-plum-five.vercel.app/`
+- Health check: `https://gh-stats-plum-five.vercel.app/api/health`
+- Limits: `https://gh-stats-plum-five.vercel.app/api/limits?format=json`
 
 ---
 
