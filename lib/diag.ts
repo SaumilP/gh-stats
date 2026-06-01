@@ -1,6 +1,6 @@
 import type { Cache } from "./cache";
 
-type Endpoint = "stats" | "repos" | "languages" | "streak" | "pin" | "gist" | "wakatime" | "health" | "limits";
+type Endpoint = "stats" | "repos" | "languages" | "streak" | "pin" | "gist" | "wakatime" | "focus" | "health" | "limits";
 
 const KEY_PREFIX = "diag:last_success:";
 
