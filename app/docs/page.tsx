@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
+import ThemeGallery from '../components/ThemeGallery';
 
 export default function DocsPage() {
   const [activeSection, setActiveSection] = useState('overview');
@@ -74,11 +75,11 @@ export default function DocsPage() {
                           <h4 className="font-semibold text-slate-900 dark:text-slate-50 mb-2">📊 Features</h4>
                           <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-2">
                             <li>✓ 8+ card types</li>
-                            <li>✓ 15+ built-in themes</li>
+                            <li>✓ 45+ built-in themes</li>
+                            <li>✓ Theme gallery with previews</li>
                             <li>✓ Custom colors & styling</li>
                             <li>✓ Server-side caching</li>
                             <li>✓ JSON & SVG output</li>
-                            <li>✓ Zero dependencies</li>
                           </ul>
                         </div>
                         <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
@@ -275,28 +276,68 @@ export default function DocsPage() {
 
                   {/* Themes */}
                   {activeSection === 'themes' && (
-                    <div className="space-y-6">
-                      <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-50">Built-in Themes</h2>
+                    <div className="space-y-8">
+                      <div>
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-50 mb-4">Built-in Themes</h2>
 
-                      <p className="text-slate-600 dark:text-slate-400">
-                        Choose from 15+ carefully designed themes or create your own with custom colors.
-                      </p>
+                        <p className="text-slate-600 dark:text-slate-400 mb-6">
+                          Choose from 45+ carefully designed themes from popular editors, design systems, and community palettes. Browse the gallery below and click any theme to see its usage.
+                        </p>
 
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {['light', 'dark', 'default', 'transparent', 'radical', 'merko', 'gruvbox', 'tokyonight', 'onedark', 'cobalt', 'synthwave', 'highcontrast', 'dracula'].map((theme) => (
-                          <div key={theme} className="border border-slate-200 dark:border-slate-700 rounded-lg p-4 text-center">
-                            <p className="font-mono text-sm font-semibold text-slate-900 dark:text-slate-50">{theme}</p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-                              <code className="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">theme={theme}</code>
+                        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-6">
+                          <h3 className="font-semibold text-green-900 dark:text-green-200 mb-2">✨ New: Theme Gallery</h3>
+                          <p className="text-green-800 dark:text-green-300 text-sm">
+                            Explore all 45+ themes with visual previews. Click any theme card to see its usage and copy the theme parameter.
+                          </p>
+                        </div>
+                      </div>
+
+                      <ThemeGallery />
+
+                      <div className="border-t border-slate-200 dark:border-slate-700 pt-8">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50 mb-4">Theme Categories</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <h4 className="font-semibold text-slate-900 dark:text-slate-50 mb-2">🎨 Popular Editor Themes</h4>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                              Community favorites from VS Code, Sublime, Atom, and other popular editors.
                             </p>
+                            <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-1">
+                              <li>• One Dark / One Dark Pro</li>
+                              <li>• Dracula (Pro variants included)</li>
+                              <li>• Gruvbox</li>
+                              <li>• Monokai</li>
+                              <li>• Radical & Merko</li>
+                            </ul>
                           </div>
-                        ))}
+                          <div>
+                            <h4 className="font-semibold text-slate-900 dark:text-slate-50 mb-2">🌈 Design Systems & Apps</h4>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                              Themes from Material Design, GitHub, Slack, Discord, and other design systems.
+                            </p>
+                            <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-1">
+                              <li>• GitHub (Light, Dark, Dimmed)</li>
+                              <li>• Material Design variants</li>
+                              <li>• Catppuccin (4 variants)</li>
+                              <li>• Solarized Light & Dark</li>
+                              <li>• Nord, Ayu, Discord, Slack</li>
+                            </ul>
+                          </div>
+                        </div>
                       </div>
 
                       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
-                        <h3 className="font-semibold text-blue-900 dark:text-blue-200 mb-2">Custom Colors</h3>
-                        <p className="text-blue-800 dark:text-blue-300 text-sm">
-                          Override any theme colors using query parameters: <code>?title_color=FF0000&bg_color=FFFFFF</code>
+                        <h3 className="font-semibold text-blue-900 dark:text-blue-200 mb-3">Custom Colors</h3>
+                        <p className="text-blue-800 dark:text-blue-300 text-sm mb-3">
+                          Don't see your favorite theme? Create custom colors using query parameters:
+                        </p>
+                        <div className="bg-white dark:bg-slate-800 rounded p-3 mb-3 overflow-x-auto">
+                          <code className="text-xs text-slate-700 dark:text-slate-300">
+                            {`?title_color=FF0000&text_color=FFFFFF&bg_color=000000&border_color=333333`}
+                          </code>
+                        </div>
+                        <p className="text-blue-800 dark:text-blue-300 text-xs">
+                          Supported parameters: <code className="bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded">title_color</code>, <code className="bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded">text_color</code>, <code className="bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded">bg_color</code>, <code className="bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded">border_color</code>, <code className="bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded">icon_color</code>
                         </p>
                       </div>
                     </div>
