@@ -1,4 +1,4 @@
-import { Theme, CardType } from "./types";
+import { Theme } from "./types";
 
 export function buildCardUrl(
   endpoint: string,
