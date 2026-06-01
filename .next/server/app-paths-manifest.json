@@ -1,16 +1,3 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/api/focus/route": "app/api/focus/route.js",
-  "/api/gist/route": "app/api/gist/route.js",
-  "/api/health/route": "app/api/health/route.js",
-  "/api/languages/route": "app/api/languages/route.js",
-  "/api/impact/route": "app/api/impact/route.js",
-  "/api/limits/route": "app/api/limits/route.js",
-  "/api/pin/route": "app/api/pin/route.js",
-  "/api/repos/route": "app/api/repos/route.js",
-  "/api/stats/route": "app/api/stats/route.js",
-  "/api/streak/route": "app/api/streak/route.js",
-  "/api/wakatime/route": "app/api/wakatime/route.js",
-  "/page": "app/page.js",
-  "/docs/page": "app/docs/page.js"
+  "/api/stats/route": "app/api/stats/route.js"
 }
