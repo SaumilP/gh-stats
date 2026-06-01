@@ -29,16 +29,22 @@
 
 The project currently focuses on a pragmatic feature set:
 
-- GitHub stats card
-- Top languages card
-- Top repositories card
-- Contribution streak card
-- Theme-aware output for dark and light embeds
+- GitHub stats card with profile metrics
+- Top languages card with distribution analysis
+- Top repositories card with sorting options
+- Contribution streak card with GitHub GraphQL data
+- Recent focus card showing language category distribution
+- Impact timeline card with 365-day contribution heatmap visualization
+- Pinned repository card renderer
+- Gist card renderer
+- WakaTime statistics renderer
+- Theme-aware output for dark and light embeds with 45+ built-in themes
+- Interactive theme gallery with category filtering and live previews
 - JSON output for debugging and integrations
 - Server-side and CDN caching support
 - Static pre-generation workflow for near-zero runtime cost
-
-The latest repository changes also introduce broader card foundations and presentation capabilities, including pin/gist/WakaTime-oriented renderers, expanded theme controls, richer language layouts, and extended diagnostics readiness.
+- Comprehensive developer documentation at `/docs`
+- Health check and rate limit diagnostics endpoints
 
 ---
 
@@ -110,9 +116,19 @@ The latest repository changes also introduce broader card foundations and presen
 
 The hosted generator lets you preview cards and generate embed snippets from the browser:
 
-- Live app: `https://gh-stats-plum-five.vercel.app/`
-- Health check: `https://gh-stats-plum-five.vercel.app/api/health`
-- Limits: `https://gh-stats-plum-five.vercel.app/api/limits?format=json`
+- **Live app**: https://gh-stats-plum-five.vercel.app/
+- **Documentation & Theme Gallery**: https://gh-stats-plum-five.vercel.app/docs
+- **Health check**: https://gh-stats-plum-five.vercel.app/api/health
+- **Rate limits**: https://gh-stats-plum-five.vercel.app/api/limits?format=json
+
+### Features in the Live App
+
+- Interactive card preview with real GitHub data
+- Theme selector with 45+ built-in themes and visual previews
+- Copy-paste embed code snippets
+- Dark/light mode toggle with automatic theme detection
+- Real-time validation and error handling
+- Service health and rate limit diagnostics
 
 ---
 
@@ -180,6 +196,28 @@ Renders a contribution streak card using GitHub GraphQL contribution data.
 /api/streak?username=octocat&format=json
 ```
 
+### `/api/focus`
+
+Renders a recent focus card showing language category distribution with progress bars.
+
+**Examples**
+
+```text
+/api/focus?username=octocat&theme=dark
+/api/focus?username=octocat&format=json
+```
+
+### `/api/impact`
+
+Renders a contribution impact timeline card with a 365-day contribution heatmap visualization.
+
+**Examples**
+
+```text
+/api/impact?username=octocat&theme=dark
+/api/impact?username=octocat&format=json
+```
+
 ### `/api/gist`
 
 Renders a gist related card using GitHub API.
@@ -235,12 +273,30 @@ Most endpoints support these parameters:
 
 ```text
 username       required GitHub username
-theme          dark | light | default | transparent | radical | merko | gruvbox | tokyonight | onedark | cobalt | synthwave | highcontrast | dracula
+theme          45+ built-in themes including: dark, light, transparent, radical, merko, gruvbox, tokyonight, onedark, dracula, nordand many more
 format         svg | json
 cacheSeconds   cache header override within allowed clamp
 refresh        1 to bypass server-side cache
 compact        1 for smaller output where supported
 ```
+
+### Available Themes
+
+The project includes 45+ built-in themes organized by category:
+
+- **Core**: light, dark, transparent
+- **Popular**: radical, merko, gruvbox, tokyonight, onedark, cobalt, synthwave, highcontrast, dracula, monokai, twilight, spacegray, zenburn, eva_dark, everforest, flexoki_dark
+- **Material**: material, material_palenight
+- **Solarized**: solarized_light, solarized_dark
+- **Editors**: vscode_dark, atom_dark, atom_light, seti
+- **GitHub**: github, github_dark, github_dimmed, copilot
+- **Apps**: slack_dark, discord
+- **Ayu**: ayu_dark, ayu_mirage
+- **Dracula**: dracula_pro_blue, dracula_pro_green, dracula_pro_pink
+- **Catppuccin**: catppuccin_latte, catppuccin_frappe, catppuccin_macchiato, catppuccin_mocha
+- **Other**: onedark_pro, nord
+
+Browse all themes with live previews at `/docs#themes`.
 
 ### Theme customization
 
@@ -318,6 +374,18 @@ maxReposForLanguages=5..50
 
 ```md
 ![Contribution streak](https://YOUR_DOMAIN/api/streak?username=YOUR_USERNAME&theme=dark)
+```
+
+### Recent focus card
+
+```md
+![Recent focus](https://YOUR_DOMAIN/api/focus?username=YOUR_USERNAME&theme=dark)
+```
+
+### Impact timeline card
+
+```md
+![Impact timeline](https://YOUR_DOMAIN/api/impact?username=YOUR_USERNAME&theme=dark)
 ```
 
 ---
