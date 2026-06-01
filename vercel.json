@@ -1,14 +1,9 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "headers": [
-    {
-      "source": "/cards/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=604800" }
-      ]
-    }
-  ],
-  "rewrites": [
-    { "source": "/", "destination": "/index.html" }
-  ]
+  "buildCommand": "npm run build",
+  "framework": "nextjs",
+  "nodeVersion": "24.x",
+  "env": {
+    "GITHUB_TOKEN": "@github_token",
+    "GH_TOKEN": "@gh_token"
+  }
 }

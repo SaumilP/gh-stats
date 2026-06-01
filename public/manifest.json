@@ -1,0 +1,16 @@
+{
+  "name": "gh-stats",
+  "short_name": "gh-stats",
+  "description": "Generate SVG cards for GitHub READMEs",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#58a6ff",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}
