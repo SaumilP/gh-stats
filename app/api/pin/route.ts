@@ -1,4 +1,4 @@
-import handler from "../../../api/pin";
+import handler from "../../../.legacy/pin";
 
 export async function GET(request: Request) {
   try {

@@ -1,4 +1,4 @@
-import handler from "../../../api/repos";
+import handler from "../../../.legacy/repos";
 
 export async function GET(request: Request) {
   try {

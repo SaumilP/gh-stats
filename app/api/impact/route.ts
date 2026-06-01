@@ -1,4 +1,4 @@
-import handler from "../../../api/impact";
+import handler from "../../../.legacy/impact";
 
 export async function GET(request: Request) {
   try {

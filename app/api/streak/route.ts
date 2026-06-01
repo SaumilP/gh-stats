@@ -1,4 +1,4 @@
-import handler from "../../../api/streak";
+import handler from "../../../.legacy/streak";
 
 export async function GET(request: Request) {
   try {

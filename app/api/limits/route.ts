@@ -1,4 +1,4 @@
-import handler from "../../../api/limits";
+import handler from "../../../.legacy/limits";
 
 export async function GET(request: Request) {
   try {

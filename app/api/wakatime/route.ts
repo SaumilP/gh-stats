@@ -1,4 +1,4 @@
-import handler from "../../../api/wakatime";
+import handler from "../../../.legacy/wakatime";
 
 export async function GET(request: Request) {
   try {

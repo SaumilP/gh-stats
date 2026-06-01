@@ -1,4 +1,4 @@
-import handler from "../../../api/stats";
+import handler from "../../../.legacy/stats";
 
 export async function GET(request: Request) {
   try {

@@ -1,4 +1,4 @@
-import handler from "../../../api/languages";
+import handler from "../../../.legacy/languages";
 
 export async function GET(request: Request) {
   try {

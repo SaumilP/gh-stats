@@ -1,4 +1,4 @@
-import handler from "../../../api/focus";
+import handler from "../../../.legacy/focus";
 
 export async function GET(request: Request) {
   try {

@@ -1,4 +1,4 @@
-import handler from "../../../api/gist";
+import handler from "../../../.legacy/gist";
 
 export async function GET(request: Request) {
   try {
