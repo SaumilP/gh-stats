@@ -1,0 +1,16 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/api/focus/route": "/api/focus",
+  "/api/gist/route": "/api/gist",
+  "/api/health/route": "/api/health",
+  "/api/languages/route": "/api/languages",
+  "/api/impact/route": "/api/impact",
+  "/api/limits/route": "/api/limits",
+  "/api/pin/route": "/api/pin",
+  "/api/repos/route": "/api/repos",
+  "/api/stats/route": "/api/stats",
+  "/api/streak/route": "/api/streak",
+  "/api/wakatime/route": "/api/wakatime",
+  "/page": "/",
+  "/docs/page": "/docs"
+}
