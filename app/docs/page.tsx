@@ -139,6 +139,7 @@ export default function DocsPage() {
                             { name: '/api/repos', desc: 'Top repositories by stars/forks' },
                             { name: '/api/streak', desc: 'Contribution streak' },
                             { name: '/api/focus', desc: 'Language category distribution' },
+                            { name: '/api/impact', desc: 'Contribution timeline heatmap' },
                             { name: '/api/pin', desc: 'Pinned repository' },
                             { name: '/api/gist', desc: 'Gist card' },
                             { name: '/api/wakatime', desc: 'WakaTime statistics' },
@@ -189,6 +190,12 @@ export default function DocsPage() {
                             desc: 'Recent focus by language category',
                             params: ['username (required)', 'theme', 'max_repos (10-100)'],
                             example: '/api/focus?username=octocat&theme=dark',
+                          },
+                          {
+                            endpoint: '/api/impact',
+                            desc: 'Contribution timeline heatmap (365 days)',
+                            params: ['username (required)', 'theme', 'hide_title', 'custom_title'],
+                            example: '/api/impact?username=octocat&theme=dark',
                           },
                         ].map((item, idx) => (
                           <div key={idx} className="border border-slate-200 dark:border-slate-700 rounded-lg p-4">
