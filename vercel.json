@@ -1,14 +1,10 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
   "headers": [
     {
-      "source": "/cards/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=604800" }
-      ]
+      "source": "/cards/:path*",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=300, s-maxage=86400" }]
     }
-  ],
-  "rewrites": [
-    { "source": "/", "destination": "/index.html" }
   ]
 }

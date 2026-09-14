@@ -73,7 +73,7 @@ export function qFormat(q: any): "svg" | "json" {
 export function qCacheSeconds(q: any, def: number): number {
   // Cost-control knob; clamp 5m..24h.
   const raw = qString(q, "cacheSeconds") ?? qString(q, "cache_seconds");
-  const v = raw ? qInt({ cacheSeconds: raw }, "cacheSeconds", def, 300, 86400) : def;
+  const v = raw ? qInt({ cacheSeconds: raw }, "cacheSeconds", def, 300, 86400) : (def > 60 ? 86400 : def);
   return v;
 }
 

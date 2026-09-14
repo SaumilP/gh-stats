@@ -1,0 +1,19 @@
+name: Service Smoke Check
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "43 6 * * *"
+permissions:
+  contents: read
+jobs:
+  check:
+    if: vars.GH_STATS_BASE_URL != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Check service readiness and a rendered card
+        env:
+          BASE_URL: ${{ vars.GH_STATS_BASE_URL }}
+        run: |
+          curl --fail --retry 2 --max-time 30 "$BASE_URL/api/health"
+          curl --fail --retry 2 --max-time 30 "$BASE_URL/api/stats?username=octocat&format=json"

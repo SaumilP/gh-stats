@@ -1,230 +1,125 @@
+import { createHash } from "node:crypto";
+import { cachedData } from "./data-cache";
+import { requestContext } from "./context";
+
 const GH_API = "https://api.github.com";
+let cooldownUntil = 0;
+let cooldownReason = "rate_limited";
 
-function authHeaders() {
-  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
-
-export function githubTokenPresent() {
-  return Boolean(process.env.GITHUB_TOKEN || process.env.GH_TOKEN);
-}
+export function githubTokenPresent() { return Boolean((process.env.GITHUB_TOKEN || process.env.GH_TOKEN)?.trim()); }
+export function githubStatus() { return { tokenPresent: githubTokenPresent(), cooldownUntil: cooldownUntil > Date.now() ? new Date(cooldownUntil).toISOString() : null }; }
 
 async function ghFetch(url: string, init: RequestInit = {}) {
-  const headers = {
-    "User-Agent": "github-stats-vercel",
-    "Accept": "application/vnd.github+json",
-    ...authHeaders(),
-    ...(init.headers || {}),
-  } as Record<string, string>;
-
-  const resp = await fetch(url, { ...init, headers });
-  if (!resp.ok) {
-    const txt = await resp.text().catch(() => "");
-    throw new Error(`GitHub API error ${resp.status}: ${txt.slice(0, 300)}`);
+  if (Date.now() < cooldownUntil) throw new Error(cooldownReason);
+  const token = (process.env.GITHUB_TOKEN || process.env.GH_TOKEN)?.trim();
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const remaining = (requestContext.getStore()?.deadline ?? Date.now() + 8000) - Date.now();
+    if (remaining < 100) throw new Error("request_timeout");
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        ...init,
+        headers: { "User-Agent": "gh-stats", Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", ...(token ? { Authorization: `Bearer ${token}` } : {}), ...init.headers },
+        signal: AbortSignal.timeout(Math.min(8000, remaining)),
+        cache: "no-store",
+      });
+    } catch { throw new Error("upstream_timeout"); }
+    if (response.ok) return response;
+    if (response.status === 404) throw new Error("not_found");
+    if (response.status === 401 || response.status === 403 || response.status === 429) {
+      cooldownReason = response.status === 401 ? "token_invalid" : "rate_limited";
+      const reset = Number(response.headers.get("x-ratelimit-reset")) * 1000;
+      const retry = Number(response.headers.get("retry-after")) * 1000;
+      cooldownUntil = Date.now() + Math.min(3_600_000, Math.max(60_000, retry, reset - Date.now()));
+      throw new Error(cooldownReason);
+    }
+    if (response.status < 500 || attempt === 1) throw new Error("upstream_unavailable");
+    await response.body?.cancel();
+    await new Promise(resolve => setTimeout(resolve, 200));
   }
-  return resp;
+  throw new Error("upstream_unavailable");
 }
 
-export async function getUser(username: string) {
-  const resp = await ghFetch(`${GH_API}/users/${encodeURIComponent(username)}`);
-  return (await resp.json()) as any;
+export type RestRepo = { name: string; description: string | null; stargazers_count: number; forks_count: number; fork: boolean; archived: boolean; updated_at: string; language: string | null; private: boolean };
+export type User = { login: string; name: string | null; followers: number; public_repos: number };
+export function getUser(username: string): Promise<User> {
+  return cachedData(`user:${username.toLowerCase()}`, async () => (await ghFetch(`${GH_API}/users/${encodeURIComponent(username)}`)).json());
 }
 
-export async function listRepos(username: string) {
-  const resp = await ghFetch(`${GH_API}/users/${encodeURIComponent(username)}/repos?per_page=100&sort=updated`);
-  return (await resp.json()) as any;
-}
-
-export async function listReposPage(username: string, perPage: number, sort: "updated" | "pushed" | "created" | "full_name" = "updated") {
-  const pp = Math.max(1, Math.min(100, Math.floor(perPage)));
-  const resp = await ghFetch(`${GH_API}/users/${encodeURIComponent(username)}/repos?per_page=${pp}&sort=${encodeURIComponent(sort)}`);
-  return (await resp.json()) as any;
-}
-
-export async function getLatestRepoUpdatedAt(username: string): Promise<string | null> {
-  const repos = await listReposPage(username, 1, "updated");
-  const first = Array.isArray(repos) ? repos[0] : null;
-  const ts = first?.updated_at;
-  return typeof ts === "string" ? ts : null;
-}
-
-export async function getRepoLanguages(owner: string, repo: string) {
-  const resp = await ghFetch(`${GH_API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/languages`);
-  return (await resp.json()) as any;
-}
-
-export async function graphQL<T>(query: string, variables: Record<string, any>): Promise<T> {
-  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
-  if (!token) throw new Error("Missing GITHUB_TOKEN for GraphQL endpoint.");
-  const resp = await fetch("https://api.github.com/graphql", {
-    method: "POST",
-    headers: {
-      "User-Agent": "github-stats-vercel",
-      "Content-Type": "application/json",
-      "Accept": "application/vnd.github+json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ query, variables }),
+export function listRepos(username: string): Promise<RestRepo[]> {
+  return cachedData(`repos:${username.toLowerCase()}`, async () => {
+    const repos: RestRepo[] = [];
+    // Bound cost for very large accounts. Consumers disclose the 500-repo limit.
+    for (let page = 1; page <= 5; page++) {
+      const response = await ghFetch(`${GH_API}/users/${encodeURIComponent(username)}/repos?type=owner&per_page=100&sort=updated&page=${page}`);
+      const batch: RestRepo[] = await response.json();
+      repos.push(...batch.filter(repo => !repo.private));
+      if (batch.length < 100) break;
+    }
+    return repos;
   });
-  if (!resp.ok) {
-    const txt = await resp.text().catch(() => "");
-    throw new Error(`GitHub GraphQL error ${resp.status}: ${txt.slice(0, 300)}`);
-  }
-  const payload = (await resp.json()) as any;
-  if (payload.errors?.length) throw new Error(`GitHub GraphQL errors: ${JSON.stringify(payload.errors).slice(0, 300)}`);
-  return payload.data as T;
 }
 
-export type RepoNode = {
-  name: string;
-  description?: string | null;
-  stargazerCount: number;
-  forkCount: number;
-  isFork: boolean;
-  isArchived: boolean;
-  updatedAt: string;
-  primaryLanguage?: { name: string } | null;
-};
+export async function getLatestRepoUpdatedAt(username: string) { return (await listRepos(username))[0]?.updated_at || null; }
 
-export type UserRepoSummary = {
-  login: string;
-  name?: string | null;
-  followers: number;
-  publicRepos: number;
-  repos: RepoNode[];
-};
+export function getRepoLanguages(owner: string, repo: string): Promise<Record<string, number>> {
+  return cachedData(`languages:${owner.toLowerCase()}/${repo.toLowerCase()}`, async () => (await ghFetch(`${GH_API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/languages`)).json());
+}
 
-const USER_REPOS_QUERY = `
-query($login:String!, $repoLimit:Int!) {
-  user(login:$login) {
-    login
-    name
-    followers { totalCount }
-    repositories(privacy:PUBLIC, first:$repoLimit, orderBy:{field:UPDATED_AT, direction:DESC}) {
-      totalCount
-      nodes {
-        name
-        description
-        stargazerCount
-        forkCount
-        isFork
-        isArchived
-        updatedAt
-        primaryLanguage { name }
-      }
+export function graphQL<T>(query: string, variables: Record<string, unknown>): Promise<T> {
+  const hash = createHash("sha256").update(JSON.stringify({ query, variables })).digest("hex");
+  return cachedData(`graphql:${hash}`, async () => {
+    if (!githubTokenPresent()) throw new Error("token_missing");
+    const response = await ghFetch(`${GH_API}/graphql`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ query, variables }) });
+    const payload = await response.json();
+    if (payload.errors?.length) {
+      const type = payload.errors[0]?.type;
+      if (type === "NOT_FOUND") throw new Error("not_found");
+      if (type === "RATE_LIMITED") { cooldownUntil = Date.now() + 60_000; throw new Error("rate_limited"); }
+      throw new Error("graphql_error");
     }
-  }
-}
-`;
-
-export async function getUserRepoSummary(login: string, repoLimit = 100): Promise<UserRepoSummary> {
-  type Gql = {
-    user: {
-      login: string;
-      name?: string | null;
-      followers: { totalCount: number };
-      repositories: { totalCount: number; nodes: RepoNode[] };
-    } | null;
-  };
-  const data = await graphQL<Gql>(USER_REPOS_QUERY, { login, repoLimit: Math.max(1, Math.min(100, Math.floor(repoLimit))) });
-  if (!data.user) throw new Error("GitHub user not found.");
-  return {
-    login: data.user.login,
-    name: data.user.name,
-    followers: data.user.followers.totalCount || 0,
-    publicRepos: data.user.repositories.totalCount || 0,
-    repos: data.user.repositories.nodes || [],
-  };
+    return payload.data as T;
+  });
 }
 
-export async function getRateLimit() {
-  const resp = await ghFetch(`${GH_API}/rate_limit`);
-  return (await resp.json()) as any;
+export type RepoNode = { name: string; description?: string | null; stargazerCount: number; forkCount: number; isFork: boolean; isArchived: boolean; updatedAt: string; primaryLanguage?: { name: string } | null };
+export type UserRepoSummary = { login: string; name?: string | null; followers: number; publicRepos: number; repos: RepoNode[]; sampled: boolean };
+
+export async function getUserRepoSummary(login: string, repoLimit = 500): Promise<UserRepoSummary> {
+  const [user, repos] = await Promise.all([getUser(login), listRepos(login)]);
+  return { login: user.login, name: user.name, followers: user.followers, publicRepos: user.public_repos, sampled: user.public_repos > repos.length,
+    repos: repos.slice(0, repoLimit).map(repo => ({ name: repo.name, description: repo.description, stargazerCount: repo.stargazers_count, forkCount: repo.forks_count, isFork: repo.fork, isArchived: repo.archived, updatedAt: repo.updated_at, primaryLanguage: repo.language ? { name: repo.language } : null })) };
 }
 
-export async function getRepo(owner: string, repo: string) {
-  const resp = await ghFetch(`${GH_API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`);
-  return (await resp.json()) as any;
+export type Contributions = { totalCommitContributions: number; totalIssueContributions: number; totalPullRequestContributions: number; totalPullRequestReviewContributions: number; contributionCalendar: { weeks: Array<{ contributionDays: Array<{ date: string; contributionCount: number }> }> } };
+const CONTRIBUTIONS_QUERY = `query($login:String!, $from:DateTime, $to:DateTime) { user(login:$login) { contributionsCollection(from:$from,to:$to) { totalCommitContributions totalIssueContributions totalPullRequestContributions totalPullRequestReviewContributions contributionCalendar { weeks { contributionDays { date contributionCount } } } } } }`;
+
+export async function getContributions(login: string, from: string | null = null, to: string | null = null) {
+  const result = await graphQL<{ user: { contributionsCollection: Contributions } | null }>(CONTRIBUTIONS_QUERY, { login: login.toLowerCase(), from, to });
+  if (!result.user) throw new Error("not_found");
+  return result.user.contributionsCollection;
 }
 
-export async function getGist(id: string) {
-  const resp = await ghFetch(`${GH_API}/gists/${encodeURIComponent(id)}`);
-  return (await resp.json()) as any;
+export type UserStatsSummary = UserRepoSummary & { contributions?: { commits: number; issues: number; prs: number; reviews: number } };
+export async function getUserStatsSummary(login: string, repoLimit = 500, from: string | null = null, to: string | null = null): Promise<UserStatsSummary> {
+  const [summary, contributions] = await Promise.all([getUserRepoSummary(login, repoLimit), getContributions(login, from, to)]);
+  return { ...summary, contributions: { commits: contributions.totalCommitContributions, issues: contributions.totalIssueContributions, prs: contributions.totalPullRequestContributions, reviews: contributions.totalPullRequestReviewContributions } };
 }
 
-export type UserStatsSummary = UserRepoSummary & {
-  contributions?: {
-    commits: number;
-    issues: number;
-    prs: number;
-    reviews: number;
-  };
-};
+export function getRateLimit() { return cachedData("rate_limit", async () => (await ghFetch(`${GH_API}/rate_limit`)).json(), 60); }
 
-const USER_STATS_QUERY = `
-query($login:String!, $repoLimit:Int!, $from:DateTime, $to:DateTime) {
-  user(login:$login) {
-    login
-    name
-    createdAt
-    followers { totalCount }
-    repositories(privacy:PUBLIC, first:$repoLimit, orderBy:{field:UPDATED_AT, direction:DESC}) {
-      totalCount
-      nodes {
-        name
-        description
-        stargazerCount
-        forkCount
-        isFork
-        isArchived
-        updatedAt
-        primaryLanguage { name }
-      }
-    }
-    contributionsCollection(from:$from, to:$to) {
-      totalCommitContributions
-      totalIssueContributions
-      totalPullRequestContributions
-      totalPullRequestReviewContributions
-    }
-  }
+export function getRepo(owner: string, repo: string) {
+  return cachedData(`repo:${owner.toLowerCase()}/${repo.toLowerCase()}`, async () => {
+    const data = await (await ghFetch(`${GH_API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`)).json();
+    if (data.private) throw new Error("private_resource");
+    return data;
+  });
 }
-`;
 
-export async function getUserStatsSummary(
-  login: string,
-  repoLimit = 100,
-  from: string | null = null,
-  to: string | null = null,
-): Promise<UserStatsSummary> {
-  type Gql = {
-    user: {
-      login: string;
-      name?: string | null;
-      createdAt: string;
-      followers: { totalCount: number };
-      repositories: { totalCount: number; nodes: RepoNode[] };
-      contributionsCollection: {
-        totalCommitContributions: number;
-        totalIssueContributions: number;
-        totalPullRequestContributions: number;
-        totalPullRequestReviewContributions: number;
-      };
-    } | null;
-  };
-  const data = await graphQL<Gql>(USER_STATS_QUERY, { login, repoLimit: Math.max(1, Math.min(100, Math.floor(repoLimit))), from, to });
-  if (!data.user) throw new Error("GitHub user not found.");
-  return {
-    login: data.user.login,
-    name: data.user.name,
-    followers: data.user.followers.totalCount || 0,
-    publicRepos: data.user.repositories.totalCount || 0,
-    repos: data.user.repositories.nodes || [],
-    contributions: {
-      commits: Number(data.user.contributionsCollection?.totalCommitContributions || 0),
-      issues: Number(data.user.contributionsCollection?.totalIssueContributions || 0),
-      prs: Number(data.user.contributionsCollection?.totalPullRequestContributions || 0),
-      reviews: Number(data.user.contributionsCollection?.totalPullRequestReviewContributions || 0),
-    },
-  };
+export function getGist(id: string) {
+  return cachedData(`gist:${id}`, async () => {
+    const data = await (await ghFetch(`${GH_API}/gists/${encodeURIComponent(id)}`)).json();
+    if (!data.public) throw new Error("private_resource");
+    return data;
+  });
 }

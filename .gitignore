@@ -6,3 +6,10 @@ dist
 .env.*
 README_bak.md
 .env*.local
+.next/
+*.tsbuildinfo
+.playwright-mcp/
+playwright-report/
+test-results/
+.claude/
+!.env.example

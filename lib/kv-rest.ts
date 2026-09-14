@@ -1,57 +1,36 @@
 import type { Cache } from "./cache";
 
-function joinUrl(base: string, path: string) {
-  if (base.endsWith("/")) base = base.slice(0, -1);
-  if (!path.startsWith("/")) path = `/${path}`;
-  return `${base}${path}`;
-}
-
-function enc(s: string) {
-  return encodeURIComponent(s);
-}
-
-async function kvFetch(url: string, token: string, init: RequestInit) {
-  const resp = await fetch(url, {
-    ...init,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      ...(init.headers || {}),
-    },
-  });
-  if (!resp.ok) {
-    const txt = await resp.text().catch(() => "");
-    throw new Error(`KV REST error ${resp.status}: ${txt.slice(0, 200)}`);
-  }
-  return resp;
-}
-
-// Compatible with Upstash Redis REST style used by Vercel KV:
-// - GET  {KV_REST_API_URL}/get/{key}
-// - POST {KV_REST_API_URL}/setex/{key}/{ttl}/{value}
+/** Upstash-compatible commands travel in the body, never inside a long URL. */
 export class KvRestCache implements Cache {
-  constructor(
-    private readonly baseUrl: string,
-    private readonly token: string,
-    private readonly keyPrefix = "",
-  ) {}
+  constructor(private readonly url: string, private readonly token: string) {}
 
-  private k(key: string) {
-    return `${this.keyPrefix}${key}`;
+  private async command(args: (string | number)[]) {
+    const response = await fetch(this.url, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${this.token}`, "Content-Type": "application/json" },
+      body: JSON.stringify(args),
+      signal: AbortSignal.timeout(1500),
+      cache: "no-store",
+    });
+    if (!response.ok) throw new Error(`cache_http_${response.status}`);
+    const payload = await response.json();
+    if (payload.error) throw new Error("cache_command_failed");
+    return payload.result;
   }
 
   async get(key: string): Promise<string | null> {
-    const url = joinUrl(this.baseUrl, `/get/${enc(this.k(key))}`);
-    const resp = await kvFetch(url, this.token, { method: "GET" });
-    const data = (await resp.json()) as any;
-    const result = data?.result;
-    if (result === null || result === undefined) return null;
-    return String(result);
+    return this.command(["GET", key]);
   }
 
-  async set(key: string, value: string, ttlSeconds: number): Promise<void> {
-    const ttl = Math.max(1, Math.floor(ttlSeconds));
-    const url = joinUrl(this.baseUrl, `/setex/${enc(this.k(key))}/${ttl}/${enc(value)}`);
-    await kvFetch(url, this.token, { method: "POST" });
+  async set(key: string, value: string, ttl: number) {
+    await this.command(["SET", key, value, "EX", Math.max(1, Math.floor(ttl))]);
+  }
+
+  async claim(key: string, owner: string, ttl: number): Promise<boolean> {
+    return (await this.command(["SET", key, owner, "NX", "EX", ttl])) === "OK";
+  }
+
+  async release(key: string, owner: string) {
+    await this.command(["EVAL", "if redis.call('get',KEYS[1]) == ARGV[1] then return redis.call('del',KEYS[1]) else return 0 end", 1, key, owner]);
   }
 }
-
