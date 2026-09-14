@@ -1,105 +1,25 @@
-'use client';
-
-import { useState, useCallback, useEffect } from 'react';
-import { Header } from './components/Header';
-import { Hero } from './components/Hero';
-import { PreviewPanel } from './components/PreviewPanel';
-import { EmbedSection } from './components/EmbedSection';
-import { EndpointsSection } from './components/EndpointsSection';
-import { Footer } from './components/Footer';
-import { Theme, PreviewState } from '@/lib/types';
+import { Header } from "./components/Header";
+import { Footer } from "./components/Footer";
+import { Icon } from "./components/Icon";
+import { CardStudio } from "./components/CardStudio";
+import { THEMES } from "@/lib/theme";
+import { CARD_TYPES } from "@/lib/studio";
 
 export default function Home() {
-  const [username, setUsername] = useState('octocat');
-  const [theme, setTheme] = useState<Theme>('auto');
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  // Initialize from URL parameters on mount
-  useEffect(() => {
-    // Check if window is defined (client-side only)
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    // Get URL parameters
-    const params = new URLSearchParams(window.location.search);
-    const urlUsername = params.get('username');
-    const urlTheme = params.get('theme') as Theme | null;
-
-    // Update state from URL parameters if provided
-    if (urlUsername) {
-      setUsername(urlUsername);
-    }
-    if (urlTheme && ['auto', 'dark', 'light'].includes(urlTheme)) {
-      setTheme(urlTheme);
-    }
-
-    // Mark as initialized for hydration safety
-    setIsInitialized(true);
-  }, []);
-
-  // Handle preview updates and URL syncing
-  const handlePreviewUpdate = useCallback((state: PreviewState) => {
-    setUsername(state.username);
-    setTheme(state.theme);
-
-    // Update URL without page reload
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams();
-      params.set('username', state.username);
-      params.set('theme', state.theme);
-      window.history.replaceState({}, '', `?${params.toString()}`);
-    }
-  }, []);
-
-  // Render nothing during hydration to prevent mismatch
-  if (!isInitialized) {
-    return null;
-  }
-
-  return (
-    <>
-      <Header />
-      <main className="flex flex-col">
-        {/* Hero Section */}
-        <Hero onPreviewUpdate={handlePreviewUpdate} />
-
-        {/* Preview Section - Responsive Grid */}
-        <section id="preview" className="py-8 sm:py-12 md:py-20 px-4 sm:px-6 md:px-8">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start">
-              {/* Description Box - Left on desktop */}
-              <div className="order-2 md:order-1">
-                <div className="glass rounded-lg bg-white/40 dark:bg-slate-800/40 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50 p-6 sm:p-8">
-                  <h2 className="text-2xl xs:text-3xl sm:text-4xl font-bold mb-4 text-slate-900 dark:text-slate-50">
-                    Preview Your Stats
-                  </h2>
-                  <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base leading-relaxed mb-4">
-                    Watch your GitHub statistics come to life in real-time. Update the username and theme in the hero section above to see your personalized cards instantly.
-                  </p>
-                  <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base leading-relaxed">
-                    These cards are perfect for README files, portfolios, or any place you want to showcase your GitHub profile.
-                  </p>
-                </div>
-              </div>
-
-              {/* Preview Panel - Right on desktop */}
-              <div className="order-1 md:order-2">
-                <div className="glass rounded-lg bg-white/40 dark:bg-slate-800/40 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50">
-                  <PreviewPanel username={username} theme={theme} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Embed Section */}
-        <EmbedSection username={username} />
-
-        {/* Endpoints Section */}
-        <EndpointsSection />
-      </main>
-      <Footer />
-    </>
-  );
+  const themes = Object.entries(THEMES).filter(([name]) => name !== "default").map(([name, tokens]) => ({ name, bg: tokens.bg, accent: tokens.accent }));
+  return <><Header /><main id="main">
+    <section className="hero shell">
+      <div className="hero-copy"><a href="https://github.com/SaumilP/gh-stats" className="hero-kicker"><span className="status-dot" />FREE. OPEN SOURCE. YOURS.<Icon name="arrow" size={14} /></a><h1>You build great things.<br /><span>Let your profile<br className="desktop-break" /> tell the story.</span></h1><p>Turn your GitHub activity into beautifully crafted cards. A little personality for the place your code calls home.</p><div className="hero-actions"><a href="#studio" className="button primary large">Create your card<Icon name="arrow" size={18} /></a><a href="#collection" className="button ghost large">Explore the collection</a></div><div className="hero-assurances"><span><Icon name="check" size={14} />No signup</span><span><Icon name="check" size={14} />No token to use</span><span><Icon name="check" size={14} />Just copy & embed</span></div></div>
+      <div className="hero-art" aria-label="Examples of a customized GitHub profile">
+        <div className="art-orbit orbit-one" /><div className="art-orbit orbit-two" />
+        <div className="profile-window"><div className="window-top"><div className="window-dots"><i /><i /><i /></div><span>your-handle / README.md</span><Icon name="repo" size={14} /></div><div className="profile-intro"><span className="profile-avatar">y.</span><div><strong>Hey, I’m a builder <span className="wave">✳</span></strong><p>Curious mind. Open-source heart.</p></div><span className="profile-tag">README</span></div><img src="/examples/stats.svg" alt="Example overview card with stars, repositories, forks, and followers" width={480} height={266} fetchPriority="high" /><div className="mini-activity"><div><span>A little progress, every day.</span><Icon name="bolt" size={13} /></div><div className="contribution-grid" aria-hidden="true">{Array.from({ length: 168 }, (_, i) => <i key={i} style={{ opacity: .12 + ((i * 17 + Math.floor(i / 7) * 3) % 7) * .14 }} />)}</div></div></div>
+        <div className="floating-streak"><span className="flame-icon"><Icon name="flame" size={26} /></span><div><strong>24 days</strong><span>Building a little, every day.</span></div><span className="tiny-label">STREAK</span></div><div className="art-label"><span>Less plain. More you.</span><svg width="65" height="32" viewBox="0 0 65 32" fill="none" aria-hidden="true"><path d="M2 5c28 31 35 17 55 3m-11 0 14-4-4 13" stroke="currentColor" strokeWidth="1.4" /></svg></div>
+      </div>
+    </section>
+    <div className="feature-strip"><div className="shell"><span><Icon name="grid" />9 ways to tell your story</span><span><Icon name="code" />{themes.length} expressive themes</span><span><Icon name="bolt" />Lightweight SVGs</span><span><Icon name="clock" />Fresh every day</span></div></div>
+    <CardStudio themes={themes} />
+    <section id="collection" className="collection-section shell"><div className="section-heading"><div><span className="eyebrow">SMALL CARDS. BIG PERSONALITY.</span><h2>One profile. Many dimensions.</h2><p>Your favorite language. Your latest project. Your next streak.</p></div><a href="/docs#endpoints" className="text-link">Explore the API <Icon name="arrow" size={16} /></a></div><div className="collection-grid">{[CARD_TYPES[1], CARD_TYPES[2], CARD_TYPES[4]].map(card => <a className="collection-card" key={card.id} href={`/?card=${card.id}#studio`}><div className="collection-preview"><img src={`/examples/${card.id}.svg`} alt={`${card.label} card with illustrative data`} width={480} height={200} loading="lazy" /></div><div className="collection-meta"><div><h3>{card.label}</h3><p>{card.description}</p></div><Icon name="arrow" /></div></a>)}</div></section>
+    <section className="why-section shell"><div className="why-intro"><span className="eyebrow">THOUGHTFUL BY DEFAULT</span><h2>Looks good.<br /><span>Works harder.</span></h2><p>Built to belong in your README. Designed to stay there.</p><a href="/docs#caching" className="text-link">How it works <Icon name="arrow" size={16} /></a></div><div className="why-grid">{[{ icon: "bolt", title: "Fast by design", text: "Crisp SVGs served through a global CDN. No scripts, trackers, or heavy image downloads in your profile." }, { icon: "shield", title: "A little more resilient", text: "Daily snapshots keep your cards available during temporary GitHub issues, for up to seven days." }, { icon: "sun", title: "At home in any theme", text: "Go dark, keep it light, or let an adaptive embed match your reader’s preference." }, { icon: "code", title: "Open from the start", text: "A public API, readable source, and an MIT license. Use the hosted service or make it your own." }].map(feature => <div key={feature.title}><span className="feature-icon"><Icon name={feature.icon} /></span><h3>{feature.title}</h3><p>{feature.text}</p></div>)}</div></section>
+    <section className="final-cta shell"><div><span className="eyebrow">YOU’VE ALREADY DONE THE HARD PART.</span><h2>Give your work a home<br />worth showing off.</h2></div><a href="#studio" className="button primary large">Make it yours <Icon name="arrow" size={18} /></a><span className="cta-decoration" aria-hidden="true">↗</span></section>
+  </main><Footer /></>;
 }

@@ -9,8 +9,9 @@ import {
 import { getCache } from "../lib/cache";
 import { cacheGet, cacheSet } from "../lib/cache-aside";
 import { staleExtraSecondsFor, ttlSecondsFor } from "../lib/config";
-import { githubTokenPresent, graphQL } from "../lib/github";
+import { getContributions } from "../lib/github";
 import { computeStreak } from "../lib/streak";
+import { requestContext } from "../lib/context";
 import { requestIdFrom } from "../lib/request";
 import { sendJson, sendSvg } from "../lib/response";
 import { renderStreak } from "../cards/streak";
@@ -19,37 +20,6 @@ import { recordLastSuccess } from "../lib/diag";
 import { withCacheKeyVersion } from "../lib/cache-key";
 import { resolveTheme, styleKeyFrom } from "../lib/theme";
 
-type GqlResp = {
-  user: {
-    contributionsCollection: {
-      contributionCalendar: {
-        weeks: Array<{
-          contributionDays: Array<{
-            date: string;
-            contributionCount: number;
-          }>;
-        }>;
-      };
-    };
-  };
-};
-
-const QUERY = `
-  query($login:String!) {
-    user(login:$login) {
-      contributionsCollection {
-        contributionCalendar {
-          weeks {
-            contributionDays {
-              date
-              contributionCount
-            }
-          }
-        }
-      }
-    }
-  }
-`;
 
 export default async function handler(req: any, res: any) {
   const requestId = requestIdFrom(req);
@@ -99,32 +69,6 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  if (!githubTokenPresent()) {
-    const hint =
-      "Set GITHUB_TOKEN (or GH_TOKEN) in Vercel env vars to enable /api/streak";
-
-    if (format === "json") {
-      res.statusCode = 401;
-      sendJson(req, res, { error: "token_required", hint, requestId }, 60);
-      return;
-    }
-
-    res.statusCode = 200;
-    sendSvg(
-      req,
-      res,
-      renderErrorCard(style, {
-        endpoint: "streak",
-        username,
-        requestId,
-        title: "Token required",
-        hint,
-        compact,
-      }),
-      60,
-    );
-    return;
-  }
 
   try {
     const key = withCacheKeyVersion(
@@ -152,9 +96,9 @@ export default async function handler(req: any, res: any) {
       }
     }
 
-    const data: GqlResp = await graphQL(QUERY, { login: username });
+    const data = await getContributions(username);
 
-    const days = data.user.contributionsCollection.contributionCalendar.weeks
+    const days = data.contributionCalendar.weeks
       .flatMap((w) =>
         w.contributionDays.map((d) => ({
           date: d.date,
@@ -163,7 +107,7 @@ export default async function handler(req: any, res: any) {
       )
       .sort((a, b) => a.date.localeCompare(b.date));
 
-    const streak = computeStreak(days);
+    const streak = computeStreak(days, new Date(requestContext.getStore()?.updatedAt || Date.now()));
 
     if (format === "json") {
       const payload = { username, ...streak };

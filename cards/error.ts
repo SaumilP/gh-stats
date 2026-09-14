@@ -1,5 +1,6 @@
 import type { ThemeStyle } from "../lib/theme";
 import { cardFooter, cardFrame, muted, textLine } from "./svg";
+import { requestContext } from "../lib/context";
 
 type ErrorCardInput = {
   endpoint: string;
@@ -12,13 +13,15 @@ type ErrorCardInput = {
 };
 
 export function renderErrorCard(style: ThemeStyle, input: ErrorCardInput) {
+  const context = requestContext.getStore();
+  if (context) context.error = input.detail || input.title || "card_error";
   const W = 720;
   const H = input.compact ? 150 : 180;
   const title = input.title || "Something went wrong";
   const ep = input.endpoint || "unknown";
   const u = input.username ? `@${input.username}` : "(missing username)";
 
-  let svg = cardFrame(style, W, H, `Error: ${ep}`);
+  let svg = cardFrame(style, W, H, `Error: ${ep}`).replace('<svg ', '<svg data-error="true" ');
   svg += textLine(style, 18, 34, "⚠️ Error", 16, 800);
   svg += muted(style, 18, 54, `${title} • ${ep} • ${u}`, 12);
 
@@ -27,7 +30,7 @@ export function renderErrorCard(style: ThemeStyle, input: ErrorCardInput) {
     svg += textLine(style, 18, y, `Hint: ${input.hint}`, 13, 600);
     y += 22;
   }
-  if (input.detail) {
+  if (input.detail && !context) {
     const d = input.detail.length > 120 ? input.detail.slice(0, 117) + "…" : input.detail;
     svg += muted(style, 18, y, d, 12);
     y += 20;

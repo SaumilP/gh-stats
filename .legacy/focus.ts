@@ -2,7 +2,7 @@ import { qBool, qCacheSeconds, qCompact, qFormat, qInt, qString, qThemeOptions }
 import { getCache } from "../lib/cache";
 import { cacheGet, cacheSet } from "../lib/cache-aside";
 import { staleExtraSecondsFor, ttlSecondsFor } from "../lib/config";
-import { getUserStatsSummary, githubTokenPresent, listRepos } from "../lib/github";
+import { getUserRepoSummary, githubTokenPresent, listRepos } from "../lib/github";
 import { requestIdFrom } from "../lib/request";
 import { sendJson, sendSvg } from "../lib/response";
 import { renderFocus, type FocusCategory } from "../cards/focus";
@@ -128,7 +128,7 @@ export default async function handler(req: any, res: any) {
     const categoryMap = new Map<string, { count: number; repos: number }>();
 
     if (githubTokenPresent()) {
-      const summary = await getUserStatsSummary(username, maxRepos);
+      const summary = await getUserRepoSummary(username, maxRepos);
       const repos = (summary.repos || [])
         .filter(r => !r.isFork && !r.isArchived)
         .slice(0, maxRepos);

@@ -18,7 +18,6 @@ function serviceVersion() {
   const v = process.env.npm_package_version;
   if (v) return v;
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const pkg = require("../package.json") as any;
     if (pkg?.version) return String(pkg.version);
   } catch {}

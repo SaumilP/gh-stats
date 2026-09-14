@@ -19,7 +19,7 @@ export type ThemeStyle = {
   bgGradient?: { angle: number; start: string; end: string };
 };
 
-const THEMES: Record<string, ThemeTokens> = {
+export const THEMES: Record<string, ThemeTokens> = {
   // Core themes
   light: {
     bg: "#ffffff",
@@ -501,7 +501,7 @@ function normalizeColor(raw?: string): string | undefined {
   if (!s) return undefined;
   if (s === "none" || s === "transparent") return s;
   const hex = s.startsWith("#") ? s.slice(1) : s;
-  if (/^[0-9a-fA-F]{3,8}$/.test(hex)) return `#${hex}`;
+  if (/^(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(hex)) return `#${hex}`;
   return undefined;
 }
 

@@ -1,42 +1,10 @@
 {
-  "buildCommand": "npm run build",
   "framework": "nextjs",
+  "buildCommand": "npm run build",
   "headers": [
     {
-      "source": "/api/:path*",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=21600, stale-while-revalidate=86400"
-        }
-      ]
-    },
-    {
-      "source": "/:path*\\.svg",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    },
-    {
-      "source": "/public/:path*",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    },
-    {
-      "source": "/:path*\\.woff2",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
+      "source": "/cards/:path*",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=300, s-maxage=86400" }]
     }
   ]
 }

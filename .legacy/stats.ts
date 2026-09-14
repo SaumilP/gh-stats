@@ -44,7 +44,7 @@ export default async function handler(req: any, res: any) {
   const hideRank = qBool(req.query, "hide_rank", false);
   const rankIcon = (qString(req.query, "rank_icon", "default") || "default").toLowerCase();
   const includeAllCommits = qBool(req.query, "include_all_commits", false);
-  const commitsYear = qInt(req.query, "commits_year", 0, 2000, 2100);
+  const commitsYear = qString(req.query, "commits_year") ? qInt(req.query, "commits_year", new Date().getUTCFullYear(), 2000, new Date().getUTCFullYear()) : 0;
   const lineHeight = qInt(req.query, "line_height", compact ? 20 : 24, 16, 40);
   const cardWidth = qInt(req.query, "card_width", 480, 320, 900);
   const textBold = qBool(req.query, "text_bold", false);
@@ -113,19 +113,16 @@ export default async function handler(req: any, res: any) {
     let stats: { name: string; username: string; repos: number; followers: number; stars: number; forks: number; commits?: number; prs?: number; issues?: number; reviews?: number; contribs?: number };
 
     if (githubTokenPresent()) {
-      const now = new Date();
       let from: string | null = null;
-      let to: string | null = now.toISOString();
+      let to: string | null = null;
       if (commitsYear) {
         from = new Date(Date.UTC(commitsYear, 0, 1)).toISOString();
         to = new Date(Date.UTC(commitsYear, 11, 31, 23, 59, 59)).toISOString();
       } else if (includeAllCommits) {
         from = new Date(Date.UTC(1970, 0, 1)).toISOString();
-      } else {
-        from = new Date(Date.UTC(now.getUTCFullYear(), 0, 1)).toISOString();
       }
 
-      const summary = await getUserStatsSummary(username, 100, from, to);
+      const summary = await getUserStatsSummary(username, 500, from, to);
       const repos = summary.repos || [];
       const stars = repos.reduce((a, r) => a + (Number(r?.stargazerCount) || 0), 0);
       const forks = repos.reduce((a, r) => a + (Number(r?.forkCount) || 0), 0);
@@ -202,6 +199,8 @@ export default async function handler(req: any, res: any) {
 
     const payload = {
       ...stats,
+      repositoryLimit: 500,
+      sampled: stats.repos > 500,
       show: Array.from(showSet),
       hide: Array.from(hideSet),
       rank: rankValue || null,

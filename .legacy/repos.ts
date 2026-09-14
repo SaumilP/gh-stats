@@ -98,7 +98,7 @@ export default async function handler(req: any, res: any) {
     let out: Array<{ name: string; stars: number; forks: number; desc?: string }>;
 
     if (githubTokenPresent()) {
-      const summary = await getUserRepoSummary(username, 100);
+      const summary = await getUserRepoSummary(username, 500);
       const filtered = (summary.repos || []).filter(r => !r.isFork && !r.isArchived);
       const ordered = filtered
         .slice()

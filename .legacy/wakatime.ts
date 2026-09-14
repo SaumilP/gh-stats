@@ -18,6 +18,7 @@ import { recordLastSuccess } from "../lib/diag";
 import { withCacheKeyVersion } from "../lib/cache-key";
 import { resolveTheme, styleKeyFrom } from "../lib/theme";
 import type { LanguageItem, LanguagesCardOptions } from "../cards/languages";
+import { cachedData } from "../lib/data-cache";
 
 type WakaLanguage = {
   name?: string;
@@ -40,36 +41,19 @@ type WakaStatsResponse = {
   };
 };
 
-function wakatimeToken(): string | null {
-  return (
-    process.env.WAKATIME_API_KEY ||
-    process.env.WAKATIME_ACCESS_TOKEN ||
-    process.env.WAKATIME_TOKEN ||
-    null
-  );
-}
-
-function basicAuthHeader(token: string): string {
-  return `Basic ${Buffer.from(token).toString("base64")}`;
-}
-
-async function getWakaTimeStats(range: string, timeoutMs = 12000): Promise<WakaStatsResponse> {
-  const token = wakatimeToken();
-  if (!token) {
-    throw new Error("Missing WAKATIME_API_KEY (or WAKATIME_ACCESS_TOKEN / WAKATIME_TOKEN).");
-  }
+async function getWakaTimeStats(range: string, username: string, timeoutMs = 8000): Promise<WakaStatsResponse> {
+  return cachedData(`wakatime:${username}:${range}`, async () => {
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const url = `https://api.wakatime.com/api/v1/users/current/stats/${encodeURIComponent(range)}`;
+    const url = `https://wakatime.com/api/v1/users/${encodeURIComponent(username)}/stats/${encodeURIComponent(range)}`;
     const resp = await fetch(url, {
       method: "GET",
       headers: {
         "User-Agent": "gh-stats-vercel",
         "Accept": "application/json",
-        "Authorization": basicAuthHeader(token),
       },
       signal: controller.signal,
     });
@@ -88,6 +72,7 @@ async function getWakaTimeStats(range: string, timeoutMs = 12000): Promise<WakaS
   } finally {
     clearTimeout(timer);
   }
+  });
 }
 
 function toLanguageItems(languages: WakaLanguage[], limit: number): LanguageItem[] {
@@ -169,9 +154,9 @@ export default async function handler(req: any, res: any) {
   const cdnCacheSeconds = qCacheSeconds(req.query, format === "svg" ? 21600 : 3600);
   const ttl = Math.min(ttlSecondsFor("wakatime"), cdnCacheSeconds);
 
-  if (!wakatimeToken()) {
+  if (!requestedUsername) {
     const hint =
-      "Set WAKATIME_API_KEY (or WAKATIME_ACCESS_TOKEN / WAKATIME_TOKEN) in Vercel env vars.";
+      "Add a WakaTime username with publicly shared statistics.";
 
     if (format === "json") {
       res.statusCode = 401;
@@ -231,7 +216,7 @@ export default async function handler(req: any, res: any) {
       }
     }
 
-    const waka = await getWakaTimeStats(range);
+    const waka = await getWakaTimeStats(range, requestedUsername || "wakatime");
     const resolvedUsername = waka.data?.username || requestedUsername || "wakatime";
     const langs = toLanguageItems(waka.data?.languages || [], limit);
 

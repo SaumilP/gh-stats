@@ -1,525 +1,146 @@
 # gh-stats
 
-<p align="center">
-  <img src="./public/logo.svg" alt="gh-stats logo" width="120" />
-</p>
+**Your work deserves a better README.**
 
-<p align="center">
-  <strong>SVG-first GitHub README cards, self-hosted on Vercel.</strong><br/>
-  Lightweight, dependency-light, cache-aware, and designed for stable embeds.
-</p>
+A free, open-source GitHub card studio and SVG API. Choose a card, find your theme, and copy an embed into your profile. Built with Next.js, React, TypeScript, and a shared daily data cache.
 
-<p align="center">
-  <a href="https://github.com/SaumilP/gh-stats">Repository</a>
-  ·
-  <a href="https://gh-stats-plum-five.vercel.app/">Live Demo</a>
-  ·
-  <a href="#features">Features</a>
-  ·
-  <a href="#deployment">Deployment</a>
-  ·
-  <a href="#api-endpoints">API Endpoints</a>
-</p>
-
----
-
-## Overview
-
-`gh-stats` is a minimal Vercel serverless service that generates GitHub profile cards as SVG or JSON output. It is built for profile READMEs, personal dashboards, and low-cost self-hosted usage.
-
-The project currently focuses on a pragmatic feature set:
-
-- GitHub stats card with profile metrics
-- Top languages card with distribution analysis
-- Top repositories card with sorting options
-- Contribution streak card with GitHub GraphQL data
-- Recent focus card showing language category distribution
-- Impact timeline card with 365-day contribution heatmap visualization
-- Pinned repository card renderer
-- Gist card renderer
-- WakaTime statistics renderer
-- Theme-aware output for dark and light embeds with 45+ built-in themes
-- Interactive theme gallery with category filtering and live previews
-- JSON output for debugging and integrations
-- Server-side and CDN caching support
-- Static pre-generation workflow for near-zero runtime cost
-- Comprehensive developer documentation at `/docs`
-- Health check and rate limit diagnostics endpoints
-
----
-
-## Example snapshots
-
-<table>
-  <tr>
-    <td width="50%">
-      <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/SaumilP/gh-stats/refs/heads/main/public/cards/stats-dark.svg">
-        <img alt="Stats card" src="https://raw.githubusercontent.com/SaumilP/gh-stats/refs/heads/main/public/cards/stats-light.svg" width="100%">
-      </picture>
-    </td>
-    <td width="50%">
-      <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/SaumilP/gh-stats/refs/heads/main/public/cards/languages-dark.svg">
-        <img alt="Languages card" src="https://raw.githubusercontent.com/SaumilP/gh-stats/refs/heads/main/public/cards/languages-light.svg" width="100%">
-      </picture>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%">
-      <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/SaumilP/gh-stats/refs/heads/main/public/cards/repos-dark.svg">
-        <img alt="Top repositories card" src="https://raw.githubusercontent.com/SaumilP/gh-stats/refs/heads/main/public/cards/repos-light.svg" width="100%">
-      </picture>
-    </td>
-    <td width="50%">
-      <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/SaumilP/gh-stats/refs/heads/main/public/cards/streak-dark.svg">
-        <img alt="Streak card" src="https://raw.githubusercontent.com/SaumilP/gh-stats/refs/heads/main/public/cards/streak-light.svg" width="100%">
-      </picture>
-    </td>
-  </tr>
-</table>
-
----
+[Card studio](https://gh-stats-plum-five.vercel.app) · [Documentation](https://gh-stats-plum-five.vercel.app/docs) · [Service health](https://gh-stats-plum-five.vercel.app/api/health)
 
 ## Features
 
-- SVG-first output for clean GitHub README embedding
-- Optional `format=json` output for diagnostics and downstream integrations
-- Vercel serverless-friendly structure using `/api/*`
-- TypeScript codebase with minimal runtime dependency surface
-- CDN caching plus server-side cache support
-- `ETag` and `If-None-Match` support for efficient repeat requests
-- Stable SVG error cards instead of raw text failures
-- Static pregeneration support for repository-committed SVG assets
-- Theme support including built-in named themes and custom color overrides
-- Configurable borders, border radius, icon colors, title colors, text colors, and background colors/gradients
-- Enhanced language card layouts such as `normal`, `compact`, `donut`, `donut-vertical`, and `pie`
-- Foundations for additional card types such as pinned repository, gist, and WakaTime renderers
-
----
-
-## Why this project
-
-`gh-stats` is positioned as a lean, understandable, self-hosted alternative for developers who want:
-
-- lower hosting complexity
-- straightforward TypeScript source code
-- tighter control over GitHub token usage
-- lighter operational cost through caching and pregeneration
-- a smaller code surface that is easier to extend for personal branding
-
----
-
-## Live usage
-
-The hosted generator lets you preview cards and generate embed snippets from the browser:
-
-- **Live app**: https://gh-stats-plum-five.vercel.app/
-- **Documentation & Theme Gallery**: https://gh-stats-plum-five.vercel.app/docs
-- **Health check**: https://gh-stats-plum-five.vercel.app/api/health
-- **Rate limits**: https://gh-stats-plum-five.vercel.app/api/limits?format=json
-
-### Features in the Live App
-
-- Interactive card preview with real GitHub data
-- Theme selector with 45+ built-in themes and visual previews
-- Copy-paste embed code snippets
-- Dark/light mode toggle with automatic theme detection
-- Real-time validation and error handling
-- Service health and rate limit diagnostics
-
----
-
-## API endpoints
-
-### `/api/stats`
-
-Renders a GitHub profile stats card.
-
-**Purpose**
-
-- Repositories
-- Followers
-- Total stars
-- Total forks
-
-**Examples**
-
-```text
-/api/stats?username=octocat&theme=dark
-/api/stats?username=octocat&format=json
-```
-
-### `/api/repos`
-
-Renders a top repositories card for public repositories.
-
-**Options**
-
-- `count=1..10`
-- `sort=stars|forks|updated`
-
-**Examples**
-
-```text
-/api/repos?username=octocat&theme=dark&count=6&sort=stars
-/api/repos?username=octocat&format=json&sort=updated
-```
-
-### `/api/languages`
-
-Renders a top languages card.
-
-**Modes**
-
-- `mode=primary` — lower-cost default mode
-- `mode=bytes` — more accurate mode for language distribution
-
-**Examples**
-
-```text
-/api/languages?username=octocat&theme=dark
-/api/languages?username=octocat&mode=bytes&theme=dark
-/api/languages?username=octocat&format=json&mode=primary
-```
-
-### `/api/streak`
-
-Renders a contribution streak card using GitHub GraphQL contribution data.
-
-**Examples**
-
-```text
-/api/streak?username=octocat&theme=dark
-/api/streak?username=octocat&format=json
-```
-
-### `/api/focus`
-
-Renders a recent focus card showing language category distribution with progress bars.
-
-**Examples**
-
-```text
-/api/focus?username=octocat&theme=dark
-/api/focus?username=octocat&format=json
-```
-
-### `/api/impact`
-
-Renders a contribution impact timeline card with a 365-day contribution heatmap visualization.
-
-**Examples**
-
-```text
-/api/impact?username=octocat&theme=dark
-/api/impact?username=octocat&format=json
-```
-
-### `/api/gist`
-
-Renders a gist related card using GitHub API.
-
-**Examples**
-
-```text
-/api/gist?id=aa5a315d61ae9438b18d
-/api/gist?id=aa5a315d61ae9438b18d&theme=tokyonight&show_icons=true
-/api/gist?id=aa5a315d61ae9438b18d&custom_title=Featured%20Gist&card_width=560
-/api/gist?id=aa5a315d61ae9438b18d&format=json
-```
-
-### `/api/wakatime`
-
-Renders a wakatime related card using Wakatime API.
-
-**Examples**
-
-```text
-/api/wakatime?username=octocat
-/api/wakatime?username=octocat&range=last_30_days
-/api/wakatime?username=octocat&layout=donut&theme=tokyonight
-/api/wakatime?username=octocat&format=json
-```
-
-### `/api/pin`
-
-Renders a pinned repository related card using GitHub API.
-
-**Examples**
-
-```text
-/api/pin?repo=SaumilP/gh-stats
-/api/pin?repo=SaumilP/gh-stats&theme=tokyonight&show_icons=true
-/api/pin?owner=SaumilP&name=gh-stats&show_owner=true&custom_title=Featured%20Repo
-/api/pin?repo=SaumilP/gh-stats&format=json
-```
-
-### `/api/health`
-
-Returns service diagnostics information.
-
-### `/api/limits`
-
-Returns rate limit diagnostics in JSON form.
-
----
-
-## Shared query parameters
-
-Most endpoints support these parameters:
-
-```text
-username       required GitHub username
-theme          45+ built-in themes including: dark, light, transparent, radical, merko, gruvbox, tokyonight, onedark, dracula, nordand many more
-format         svg | json
-cacheSeconds   cache header override within allowed clamp
-refresh        1 to bypass server-side cache
-compact        1 for smaller output where supported
-```
-
-### Available Themes
-
-The project includes 45+ built-in themes organized by category:
-
-- **Core**: light, dark, transparent
-- **Popular**: radical, merko, gruvbox, tokyonight, onedark, cobalt, synthwave, highcontrast, dracula, monokai, twilight, spacegray, zenburn, eva_dark, everforest, flexoki_dark
-- **Material**: material, material_palenight
-- **Solarized**: solarized_light, solarized_dark
-- **Editors**: vscode_dark, atom_dark, atom_light, seti
-- **GitHub**: github, github_dark, github_dimmed, copilot
-- **Apps**: slack_dark, discord
-- **Ayu**: ayu_dark, ayu_mirage
-- **Dracula**: dracula_pro_blue, dracula_pro_green, dracula_pro_pink
-- **Catppuccin**: catppuccin_latte, catppuccin_frappe, catppuccin_macchiato, catppuccin_mocha
-- **Other**: onedark_pro, nord
-
-Browse all themes with live previews at `/docs#themes`.
-
-### Theme customization
-
-The codebase now supports additional presentation controls such as:
-
-```text
-title_color
-text_color
-icon_color
-border_color
-bg_color
-hide_border
-border_radius
-```
-
-`bg_color` also supports gradient-style input in the theme resolver.
-
-### Languages-specific presentation controls
-
-The language renderer supports broader layout options:
-
-```text
-layout=normal
-layout=compact
-layout=donut
-layout=donut-vertical
-layout=pie
-hide_progress=true
-maxReposForLanguages=5..50
-```
-
----
-
-## README embed examples
-
-### Basic stats card
+- Nine card types: overview, languages, streak, impact, repositories, focus, pinned repository, gist, and WakaTime.
+- A shared theme registry, color overrides, and multiple language chart layouts.
+- Markdown, HTML, direct URLs, and adaptive light/dark embeds.
+- Shareable studio configuration and explicit preview error/retry states.
+- Static homepage, documentation, and illustrative examples; no GitHub requests on landing.
+- Daily shared data snapshots, bounded upstream requests, refresh deduplication, and stale fallback.
+- SVG and JSON output, ETags, and separate browser/CDN cache policies.
+
+## Quick start
 
 ```md
-![GitHub stats](https://YOUR_DOMAIN/api/stats?username=YOUR_USERNAME&theme=dark)
+![GitHub overview](https://gh-stats-plum-five.vercel.app/api/stats?username=YOUR_USERNAME&theme=dark)
 ```
 
-### Theme-aware `<picture>` embed
+For adaptive appearance:
 
 ```html
 <picture>
-  <source
-    srcset="https://YOUR_DOMAIN/api/stats?username=YOUR_USERNAME&theme=dark"
-    media="(prefers-color-scheme: dark)"
-  />
-  <img
-    src="https://YOUR_DOMAIN/api/stats?username=YOUR_USERNAME&theme=light"
-    alt="GitHub stats card"
-  />
+  <source media="(prefers-color-scheme: dark)"
+    srcset="https://gh-stats-plum-five.vercel.app/api/stats?username=YOUR_USERNAME&amp;theme=dark" />
+  <img src="https://gh-stats-plum-five.vercel.app/api/stats?username=YOUR_USERNAME&amp;theme=light"
+    alt="My GitHub overview" />
 </picture>
 ```
 
-### Languages + repos pairing
+Users of the hosted service do not need a token. Tokens are configured by the operator, server-side.
 
-```html
-<a href="https://github.com/YOUR_USERNAME">
-  <img height="180" src="https://YOUR_DOMAIN/api/stats?username=YOUR_USERNAME&theme=dark" />
-</a>
-<a href="https://github.com/YOUR_USERNAME?tab=repositories">
-  <img height="180" src="https://YOUR_DOMAIN/api/languages?username=YOUR_USERNAME&theme=dark&layout=compact" />
-</a>
+## Development
+
+Requires Node.js 24.
+
+```sh
+npm ci
+npm run dev
 ```
 
-### Top repos card
+Copy `.env.example` to `.env.local` and fill in the values you need. The homepage and sample cards work without credentials. GitHub REST cards can work without a token at a much lower quota; contribution endpoints require a token or a usable cached snapshot.
 
-```md
-![Top repositories](https://YOUR_DOMAIN/api/repos?username=YOUR_USERNAME&theme=dark&count=6&sort=stars)
+```sh
+npm run lint
+npm run typecheck
+npm test
+npm run audit
+npm run build
+npx playwright install chromium
+npm run test:ui
 ```
 
-### Streak card
+Browser tests start the production server on port 3100. Local screenshots and traces go to `../ai_agents_tracking/gh-stats/browser`; CI artifacts go to `/tmp/gh-stats-playwright`. `PLAYWRIGHT_CHROMIUM_EXECUTABLE` can select an existing compatible browser.
 
-```md
-![Contribution streak](https://YOUR_DOMAIN/api/streak?username=YOUR_USERNAME&theme=dark)
-```
+## API
 
-### Recent focus card
+| Endpoint | Input | Notes |
+| --- | --- | --- |
+| `/api/stats` | `username` | Stars, forks, repositories, followers; optional contribution metrics |
+| `/api/languages` | `username` | `mode=primary\|bytes`; `layout=normal\|compact\|donut\|donut-vertical\|pie` |
+| `/api/streak` | `username` | Current, longest, and active days in the rolling past-year calendar |
+| `/api/impact` | `username` | Contribution heatmap |
+| `/api/repos` | `username` | `count=1..10`; `sort=stars\|forks\|updated` |
+| `/api/focus` | `username` | Repository-language categories, not commit counts |
+| `/api/pin` | `repo=owner/name` | Public repositories only; `owner` and `name` aliases also supported |
+| `/api/gist` | `id` | Public gists only |
+| `/api/wakatime` | WakaTime `username` | Public statistics; optional `range=last_7_days` |
+| `/api/health` | — | Readiness, token state, REST/GraphQL quota, and cache state |
+| `/api/limits` | — | Alias for service diagnostics |
 
-```md
-![Recent focus](https://YOUR_DOMAIN/api/focus?username=YOUR_USERNAME&theme=dark)
-```
+Shared presentation controls include `theme`, `custom_title`, `hide_border`, `border_radius`, `title_color`, `text_color`, `icon_color`, `border_color`, and `bg_color`. Use `format=json` for structured data. See `/docs` for examples and metric definitions.
 
-### Impact timeline card
+### Metric scope
 
-```md
-![Impact timeline](https://YOUR_DOMAIN/api/impact?username=YOUR_USERNAME&theme=dark)
-```
+- Repository inventory is bounded to 500 recently updated public repositories per user. Stats JSON exposes `sampled` and `repositoryLimit`; totals for larger accounts are partial.
+- Contribution metrics default to GitHub’s rolling past-year range. `commits_year` requests a single calendar year; all-time aggregation is intentionally unsupported.
+- Primary-language mode weights selected repositories by stars. Bytes mode reads up to 10 selected public repositories.
+- Focus counts repositories by primary-language category. WakaTime reads the requested public account, never the host’s private account.
 
----
-
-## Installation
-
-```bash
-$> npm install
-```
-
-For local Vercel development:
-
-```bash
-$> npm install -g vercel
-$> npm run vercel:dev
-```
-
----
-
-## Deployment
-
-### Vercel
-
-```bash
-vercel
-```
-
-### Recommended environment variables
+## Cache architecture and cost control
 
 ```text
-GITHUB_TOKEN
-GH_TOKEN
-CACHE_ENABLED=true
-KV_REST_API_URL
-KV_REST_API_TOKEN
-CACHE_TTL_STATS=21600
-CACHE_TTL_REPOS=21600
-CACHE_TTL_LANGUAGES=86400
-CACHE_TTL_STREAK=21600
+README image → Vercel CDN → SVG renderer → shared daily snapshot → GitHub
 ```
 
----
+The CDN caches rendered output. Shared KV snapshots hold underlying data independently of theme, card style, and output format. Repositories and contribution calendars are reused across card types. No scheduled warming of arbitrary users is needed: data refreshes on demand after 24 hours.
 
-## Static pregeneration mode
+- Successful data is retained for a maximum total age of seven days. Transient provider failures can use this stale snapshot without resetting its timestamp.
+- Known deleted/private resources are not served stale on a failed refresh.
+- Response TTLs use the oldest data timestamp to prevent freshness from being extended by layered caching.
+- Stale responses are CDN-cached for at most five minutes, bounded by snapshot expiry. Errors use a 60-second CDN window and no long stale extension.
+- Concurrent refreshes share a promise locally and use short-lived owner-checked KV locks across instances. Cold followers briefly wait, then return a retryable error rather than stampeding GitHub.
+- KV calls have short timeouts. KV errors fall back to bounded local storage; successful data is still returned when cache writes fail.
+- GitHub calls have deadlines and at most one retry for 5xx responses. Authentication and rate-limit failures trigger a temporary circuit cooldown in the running instance.
+- Public `refresh`, `cacheSeconds`, and `cache_seconds` are ignored by the hosted routes. Data freshness remains operator controlled.
 
-If you want minimal runtime cost for public README views, pre-generate SVGs and commit them into the repository.
+Response headers: `X-Card-Status: fresh|stale|error`, `X-Data-Updated-At`, `X-Request-Id`. JSON errors use error HTTP statuses; SVG error responses remain viewable images with a machine-readable `data-error="true"` marker.
 
-### Repository variables
+GitHub's image proxy can retain cards beyond the origin's own cache window. Daily refresh is an origin policy, not a guarantee of an exact update time on every profile view.
 
-```text
-GH_STATS_BASE_URL
-GH_STATS_USERNAME
+## Vercel deployment
+
+Use the Next.js preset and Node.js 24. Connect Vercel’s Git integration for preview and production deployments. The manual **Deploy to Vercel** workflow is a fallback, avoiding duplicate automatic deployment pipelines.
+
+| Variable | Purpose |
+| --- | --- |
+| `GITHUB_TOKEN` (or `GH_TOKEN`) | Public GitHub data access; required for GraphQL contribution cards |
+| `KV_REST_API_URL` | Upstash-compatible REST endpoint |
+| `KV_REST_API_TOKEN` | Cache credential |
+| `NEXT_PUBLIC_SITE_URL` | Public canonical URL, used in documentation and metadata |
+
+`UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are supported aliases. Keep token permissions limited to needed public data. Never expose credentials via `NEXT_PUBLIC_` variables.
+
+Without KV configuration, caching is per-instance and does not survive cold starts. For a public Vercel deployment, use a shared cache in a region close to the functions.
+
+This architecture targets Hobby and a free shared-cache allowance at modest traffic. Monitor edge requests, transfer, invocations, active CPU, memory duration, and KV usage: cached requests still consume CDN resources. Set GitHub Actions failure notifications for the daily smoke check, and inspect Vercel usage when traffic grows.
+
+## Static pregeneration
+
+Set repository variables `GH_STATS_BASE_URL` and `GH_STATS_USERNAME` to enable the daily workflow. Optional `GH_REPOSITORY_NAME` and `GIST_ID` add pin/gist cards. For local generation, set the same environment variables and run:
+
+```sh
+npm run pregenerate
 ```
 
-### Workflow
+The script validates the entire response batch before replacing existing SVGs. It rejects HTTP-200 error cards, uses request timeouts, and replaces files atomically one at a time. The workflow only commits changed SVGs and retries transient push failures.
 
-Use the pregeneration workflow to periodically refresh committed card assets and reference them directly from your profile README.
+Static exports serve the configured profile. Arbitrary hosted users use the on-demand API.
 
----
+## Operations
 
-## Project structure
+`/api/health` returns HTTP 503 when readiness is degraded, with separate cache and GitHub information. A configured token is not automatically considered healthy. Health checks are cached briefly; the daily smoke workflow checks readiness and a JSON stats response.
 
-```text
-.github/workflows/
-api/
-cards/
-lib/
-public/
-scripts/
-README.md
-package.json
-tsconfig.json
-vercel.json
-```
+For an error, capture its request ID and time. Vercel logs include endpoint, duration, and card status. The GitHub Actions log for a static-export failure distinguishes generation errors from publishing failures.
 
-### Key folders
-
-- `api/` — Vercel function entrypoints
-- `cards/` — SVG renderers and card composition logic
-- `lib/` — query parsing, GitHub API helpers, theme resolution, ranking, diagnostics, formatting, response helpers
-- `public/` — static marketing page and public assets
-- `scripts/` — pregeneration support
-
----
-
-## Recent enhancement direction
-
-The most recent work in the repository indicates a broader evolution beyond the initial four cards. The codebase now shows support or preparation for:
-
-- richer theme/token handling
-- custom color parameters
-- border and radius customization
-- advanced language-card layouts
-- pinned repository card renderer
-- gist card renderer
-- WakaTime-oriented renderer
-- extended health diagnostics coverage for newly introduced card categories
-
-This makes the project more aligned with a self-hosted GitHub README card platform rather than a single-purpose stats endpoint set.
-
----
-
-## Homepage
-
-The repository includes a simple static landing page at `/` that previews cards and generates embed snippets.
-
-Key homepage goals:
-
-- explain the product quickly
-- let users preview cards against a chosen username
-- provide copy/paste embed snippets
-- expose health and rate-limit diagnostics
-- encourage self-hosting and low-cost usage patterns
-
----
-
-## Security posture
-
-- Minimal dependency footprint
-- TypeScript-based codebase
-- Cache-aware design to reduce upstream API pressure
-- Friendly fallback cards instead of hard failures in embeds
-
----
-
-## Acknowledgements
-
-- GitHub REST API
-- GitHub GraphQL API
-- Vercel
-- The broader GitHub profile README ecosystem, including inspiration from `anuraghazra/github-readme-stats`
-
----
+Repository layout: `app/` contains pages and native route entrypoints, `lib/` contains shared data and request handling, `cards/` contains SVG renderers, and `.legacy/` retains compatible endpoint-specific parsing/rendering behind the common adapter. Build output and agent artifacts are excluded from source control.
 
 ## License
 
-MIT. See [`LICENSE`](LICENSE) for details.
+MIT. Not affiliated with GitHub or WakaTime.

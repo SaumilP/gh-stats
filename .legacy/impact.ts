@@ -9,55 +9,11 @@ import { renderErrorCard } from "../cards/error";
 import { recordLastSuccess } from "../lib/diag";
 import { withCacheKeyVersion } from "../lib/cache-key";
 import { resolveTheme, styleKeyFrom } from "../lib/theme";
+import { getContributions as fetchContributions } from "../lib/github";
 
 async function getContributions(username: string): Promise<ContributionDay[]> {
-  const query = `
-    query($userName:String!) {
-      user(login: $userName) {
-        contributionsCollection {
-          contributionCalendar {
-            totalContributions
-            weeks {
-              contributionDays {
-                contributionCount
-                date
-              }
-            }
-          }
-        }
-      }
-    }
-  `;
-
-  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
-  if (!token) {
-    throw new Error("Missing GITHUB_TOKEN for GraphQL API access");
-  }
-
-  const response = await fetch("https://api.github.com/graphql", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-      "User-Agent": "gh-stats",
-    },
-    body: JSON.stringify({
-      query,
-      variables: { userName: username },
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`GitHub API error: ${response.status}`);
-  }
-
-  const data = (await response.json()) as any;
-
-  if (data.errors) {
-    throw new Error(`GraphQL error: ${data.errors[0]?.message}`);
-  }
-
-  const weeks = data.data?.user?.contributionsCollection?.contributionCalendar?.weeks || [];
+  const data = await fetchContributions(username);
+  const weeks = data.contributionCalendar.weeks;
   const contributions: ContributionDay[] = [];
 
   for (const week of weeks) {

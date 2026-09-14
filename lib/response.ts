@@ -1,4 +1,5 @@
 import { sha256Hex } from "./etag";
+import { requestContext } from "./context";
 
 export type Format = "svg" | "json";
 
@@ -18,7 +19,7 @@ export function withEtag(req: any, res: any, body: string) {
   const etag = `"${sha256Hex(body)}"`;
   res.setHeader("ETag", etag);
   const inm = req?.headers?.["if-none-match"];
-  if (typeof inm === "string" && inm === etag) {
+  if (typeof inm === "string" && (inm === "*" || inm.split(",").some(value => value.trim().replace(/^W\//, "") === etag))) {
     res.statusCode = 304;
     res.end();
     return true;
@@ -41,6 +42,8 @@ export function sendSvg(req: any, res: any, svg: string, cacheSeconds: number) {
 }
 
 export function sendJson(req: any, res: any, payload: unknown, cacheSeconds: number) {
+  const context = requestContext.getStore();
+  if (context && res.statusCode >= 400) context.error = "upstream_or_input_error";
   const body = JSON.stringify(payload);
   setCommonHeaders(res, "json", cacheSeconds);
   if (withEtag(req, res, body)) return;

@@ -9,10 +9,12 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'GitHub Stats',
-  description: 'Beautiful GitHub statistics and analytics',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://gh-stats-plum-five.vercel.app'),
+  title: { default: 'gh-stats — Your work deserves a better README', template: '%s · gh-stats' },
+  description: 'Turn your GitHub activity into beautifully crafted SVG cards. Customize your theme, preview your stats, and embed in seconds. Free and open source.',
+  openGraph: { title: 'Your work deserves a better README.', description: 'Beautiful GitHub cards. Built around you.', images: ['/social.svg'] },
   icons: {
-    icon: '/favicon.ico',
+    icon: '/favicon.svg',
   },
 };
 
@@ -24,6 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
+        <a href="#main" className="skip-link">Skip to content</a>
         <Providers>{children}</Providers>
       </body>
     </html>

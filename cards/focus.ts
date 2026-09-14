@@ -37,7 +37,7 @@ export function renderFocus(
 
   if (!opts.hideTitle) {
     svg += textLine(style, 18, yTitle, title, 16, 800, style.tokens.title);
-    svg += muted(style, 18, ySubtitle, `@${username} • recent activity`, 12);
+    svg += muted(style, 18, ySubtitle, `@${username} • repository language mix`, 12);
   }
 
   // Render categories with bars
@@ -65,12 +65,12 @@ export function renderFocus(
     svg += textLine(style, percentageX, y + 2, `${Math.round(cat.percentage)}%`, 12, 600, cat.color);
 
     // Commit count below category
-    const commitText = cat.commits === 1 ? "1 commit" : `${cat.commits} commits`;
+    const commitText = cat.commits === 1 ? "1 repository" : `${cat.commits} repositories`;
     svg += muted(style, 18, y + 16, commitText, 11);
   });
 
   // Footer
-  svg += muted(style, 18, H - 16, "Recent activity • last year", 11);
+  svg += muted(style, 18, H - 6, "Based on recently updated public repositories", 10);
   svg += cardFooter();
   return svg;
 }

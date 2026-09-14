@@ -30,12 +30,12 @@ export function getCardUrls(
 }
 
 export function generateEmbedCode(username: string, domain: string): string {
-  const theme = "auto";
-  const urls = getCardUrls(username, theme, domain);
+  const urls = getCardUrls(username, "light", domain);
+  const dark = getCardUrls(username, "dark", domain);
 
   return `<a href="https://github.com/${username}">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="${urls.stats}" />
+    <source media="(prefers-color-scheme: dark)" srcset="${dark.stats}" />
     <img src="${urls.stats}" alt="GitHub stats for ${username}" />
   </picture>
 </a>`;

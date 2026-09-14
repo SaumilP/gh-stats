@@ -1,16 +1,24 @@
-import handler from "../../../.legacy/health";
+import { randomUUID } from "node:crypto";
+import { cacheStatus } from "@/lib/cache";
+import { getRateLimit, githubStatus } from "@/lib/github";
+import { requestContext } from "@/lib/context";
 
-export async function GET(request: Request) {
-  try {
-    const url = new URL(request.url);
-    const req = { query: Object.fromEntries(url.searchParams), headers: request.headers };
-    const headers: Record<string, string> = {};
-    let body = "";
-    const res = { statusCode: 200, setHeader: (k: string, v: string) => { headers[k] = v; }, end: (d: string) => { body = d; } };
-    await handler(req, res);
-    return new Response(body, { status: res.statusCode, headers: { ...headers, "Content-Type": headers["Content-Type"] || "application/json" } });
-  } catch (error: any) {
-    console.error("Error in /health:", error);
-    return new Response(`Error: ${error.message}`, { status: 500, headers: { "Content-Type": "text/plain" } });
-  }
+export const maxDuration = 15;
+export async function GET() {
+  const requestId = randomUUID();
+  return requestContext.run({ requestId, deadline: Date.now() + 9000 }, async () => {
+    let rate = null;
+    let error: string | null = null;
+    try { rate = await getRateLimit(); }
+    catch (cause) { error = cause instanceof Error ? cause.message : "upstream_unavailable"; }
+    const github = githubStatus();
+    const cache = cacheStatus();
+    const context = requestContext.getStore()!;
+    const stale = context.stale || false;
+    const ok = !error && !stale && !cache.degraded && github.tokenPresent && rate?.resources?.graphql?.remaining > 0 && rate?.resources?.core?.remaining > 0;
+    return Response.json({ ok, service: "gh-stats", status: ok ? "operational" : "degraded", requestId, cache,
+      github: { ...github, status: error || (stale ? "stale_check" : github.tokenPresent ? "authenticated" : "token_missing"), checkedAt: context.updatedAt ? new Date(context.updatedAt).toISOString() : null, rest: rate?.resources?.core || null, graphql: rate?.resources?.graphql || null },
+      policy: { freshHours: 24, maximumSnapshotAgeDays: 7 } },
+    { status: ok ? 200 : 503, headers: { "Cache-Control": "no-store", "Vercel-CDN-Cache-Control": "s-maxage=60", "X-Request-Id": requestId } });
+  });
 }
